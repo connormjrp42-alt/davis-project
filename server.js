@@ -78,6 +78,8 @@ const DOC_TEMPLATE_CREATOR_NAMES = String(process.env.DOC_TEMPLATE_CREATORS || A
   .filter(Boolean);
 const DISCORD_USER_CACHE_TTL_MS = 10 * 60 * 1000;
 const DISCORD_GUILD_MEMBER_CACHE_TTL_MS = 3 * 60 * 1000;
+const AUTH_COOKIE_NAME = 'dp_auth';
+const AUTH_COOKIE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const discordUserCache = new Map();
 const discordUserInFlight = new Map();
 const discordGuildMemberCache = new Map();
@@ -142,6 +144,81 @@ function writeJSON(filePath, value) {
 
 function sanitizeText(value, max = 1000) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function parseCookieHeader(headerValue) {
+  const map = {};
+  const raw = typeof headerValue === 'string' ? headerValue : '';
+  if (!raw) return map;
+  raw.split(';').forEach((chunk) => {
+    const [k, ...rest] = chunk.split('=');
+    const key = String(k || '').trim();
+    if (!key) return;
+    map[key] = decodeURIComponent(String(rest.join('=') || '').trim());
+  });
+  return map;
+}
+
+function toBase64Url(input) {
+  return Buffer.from(input).toString('base64url');
+}
+
+function fromBase64Url(input) {
+  return Buffer.from(String(input || ''), 'base64url').toString('utf8');
+}
+
+function sanitizeSessionUser(user) {
+  const row = user && typeof user === 'object' ? user : {};
+  return {
+    id: sanitizeText(row.id, 80),
+    username: sanitizeText(row.username, 80),
+    global_name: sanitizeText(row.global_name, 80),
+    avatar: sanitizeText(row.avatar, 160),
+    email: sanitizeText(row.email, 120),
+  };
+}
+
+function createSignedAuthCookieValue(user) {
+  const safeUser = sanitizeSessionUser(user);
+  if (!safeUser.id) return '';
+  const payload = JSON.stringify({
+    user: safeUser,
+    exp: Date.now() + AUTH_COOKIE_TTL_MS,
+  });
+  const payloadB64 = toBase64Url(payload);
+  const signature = crypto
+    .createHmac('sha256', SESSION_SECRET || 'dev-secret-change-me')
+    .update(payloadB64)
+    .digest('hex');
+  return `${payloadB64}.${signature}`;
+}
+
+function verifySignedAuthCookieValue(value) {
+  const raw = sanitizeText(value, 10_000);
+  if (!raw || !raw.includes('.')) return null;
+  const [payloadB64, signature] = raw.split('.');
+  if (!payloadB64 || !signature) return null;
+  if (!/^[a-f0-9]{64}$/i.test(signature)) return null;
+
+  const expected = crypto
+    .createHmac('sha256', SESSION_SECRET || 'dev-secret-change-me')
+    .update(payloadB64)
+    .digest('hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  const providedBuf = Buffer.from(signature, 'hex');
+  if (expectedBuf.length !== providedBuf.length) return null;
+  if (!crypto.timingSafeEqual(expectedBuf, providedBuf)) return null;
+
+  try {
+    const decoded = JSON.parse(fromBase64Url(payloadB64));
+    const exp = Number(decoded?.exp);
+    if (!Number.isFinite(exp) || exp < Date.now()) return null;
+    const user = sanitizeSessionUser(decoded?.user);
+    if (!user.id) return null;
+    return user;
+  } catch (error) {
+    return null;
+  }
 }
 
 function escapeHtml(value) {
@@ -4018,6 +4095,21 @@ app.use(
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static('public', { redirect: false }));
 
+app.use((req, res, next) => {
+  if (req.session?.user?.id) return next();
+  const cookies = parseCookieHeader(req.headers?.cookie || '');
+  const authCookie = cookies[AUTH_COOKIE_NAME];
+  const restoredUser = verifySignedAuthCookieValue(authCookie);
+  if (restoredUser && req.session) {
+    req.session.user = restoredUser;
+    if (!req.session.settings) {
+      req.session.settings = getDefaultSettings(restoredUser);
+    }
+    upsertParticipant(restoredUser);
+  }
+  return next();
+});
+
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     return res.status(401).json({ error: 'not_authenticated' });
@@ -6821,13 +6913,14 @@ app.get('/auth/discord/callback', async (req, res) => {
 
     const profile = await userResponse.json();
 
-    const nextUser = {
+    const nextUser = sanitizeSessionUser({
       id: profile.id,
       username: profile.username,
       global_name: profile.global_name,
       avatar: profile.avatar,
       email: profile.email,
-    };
+    });
+    const authCookieValue = createSignedAuthCookieValue(nextUser);
 
     return req.session.regenerate((regenError) => {
       if (regenError) {
@@ -6842,6 +6935,15 @@ app.get('/auth/discord/callback', async (req, res) => {
         if (saveError) {
           return res.status(500).send('Ошибка авторизации Discord: не удалось сохранить сессию.');
         }
+        if (authCookieValue) {
+          res.cookie(AUTH_COOKIE_NAME, authCookieValue, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: AUTH_COOKIE_TTL_MS,
+            path: '/',
+          });
+        }
         return res.redirect('/');
       });
     });
@@ -6851,6 +6953,7 @@ app.get('/auth/discord/callback', async (req, res) => {
 });
 
 app.get('/auth/logout', (req, res) => {
+  res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
   req.session.destroy(() => {
     res.redirect('/');
   });
