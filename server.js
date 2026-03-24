@@ -6821,7 +6821,7 @@ app.get('/auth/discord/callback', async (req, res) => {
 
     const profile = await userResponse.json();
 
-    req.session.user = {
+    const nextUser = {
       id: profile.id,
       username: profile.username,
       global_name: profile.global_name,
@@ -6829,10 +6829,22 @@ app.get('/auth/discord/callback', async (req, res) => {
       email: profile.email,
     };
 
-    req.session.settings = getDefaultSettings(req.session.user);
-    upsertParticipant(req.session.user);
+    return req.session.regenerate((regenError) => {
+      if (regenError) {
+        return res.status(500).send('Ошибка авторизации Discord: не удалось подготовить сессию.');
+      }
 
-    return res.redirect('/');
+      req.session.user = nextUser;
+      req.session.settings = getDefaultSettings(nextUser);
+      upsertParticipant(nextUser);
+
+      return req.session.save((saveError) => {
+        if (saveError) {
+          return res.status(500).send('Ошибка авторизации Discord: не удалось сохранить сессию.');
+        }
+        return res.redirect('/');
+      });
+    });
   } catch (error) {
     return res.status(500).send(`Ошибка авторизации Discord: ${error.message}`);
   }
