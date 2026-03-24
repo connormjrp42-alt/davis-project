@@ -1,0 +1,40 @@
+{
+  "10a0e175-f450-4a58-8463-825d6f1df408": [
+    {
+      "id": "ce62ab94-2dfb-48d6-8a75-100085a9877c",
+      "projectId": "10a0e175-f450-4a58-8463-825d6f1df408",
+      "applicantName": "уцкпмуц",
+      "applicantDiscordId": "953290565838053466",
+      "contractName": "Дары моря VI",
+      "comment": "уамйу",
+      "screenshotUrl": "",
+      "status": "rejected",
+      "sourceSessionUserId": "953290565838053466",
+      "reviewedBy": "!cur | 𝕮𝖔𝖓𝖓𝖔𝖗",
+      "reviewedByUserId": "953290565838053466",
+      "discordGuildId": "1482122285052854372",
+      "discordChannelId": "1482151897950458051",
+      "discordMessageId": "1485367327099977869",
+      "createdAt": "2026-03-22T19:59:24.787Z",
+      "updatedAt": "2026-03-22T20:00:28.606Z"
+    },
+    {
+      "id": "fadd9836-b436-4007-bf6a-39acab70cfec",
+      "projectId": "10a0e175-f450-4a58-8463-825d6f1df408",
+      "applicantName": "дои",
+      "applicantDiscordId": "953290565838053466",
+      "contractName": "Гровер II",
+      "comment": "оиюло",
+      "screenshotUrl": "",
+      "status": "approved",
+      "sourceSessionUserId": "953290565838053466",
+      "reviewedBy": "!cur | 𝕮𝖔𝖓𝖓𝖔𝖗",
+      "reviewedByUserId": "953290565838053466",
+      "discordGuildId": "1482122285052854372",
+      "discordChannelId": "1482151897950458051",
+      "discordMessageId": "1485342133123809321",
+      "createdAt": "2026-03-22T18:19:16.895Z",
+      "updatedAt": "2026-03-22T18:19:25.181Z"
+    }
+  ]
+}

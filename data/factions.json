@@ -1,0 +1,58 @@
+[
+  {
+    "id": "d6286d80-0b7b-4611-9a83-67b6b5179775",
+    "name": "FIB | Houston",
+    "avatarUrl": "/uploads/factions/fib-houston-avatar-1774003070196-af917a6f.jpg",
+    "bannerUrl": "/uploads/factions/fib-houston-banner-1774003070198-f65dbfa0.jpg",
+    "createdAt": "2026-03-20T10:37:50.198Z",
+    "createdByUserId": "953290565838053466",
+    "managerIds": [
+      "953290565838053466"
+    ],
+    "managerNames": [
+      "connordavis42"
+    ],
+    "profile": {
+      "leader": "Connor Davis",
+      "leaderDiscordId": "953290565838053466",
+      "leaderDiscordProfileUrl": "",
+      "deputies": [],
+      "about": "",
+      "discordServerId": ""
+    },
+    "memos": [],
+    "tests": [
+      {
+        "id": "990d45e4-7d41-469a-ace5-0215c0f13dc9",
+        "title": "Повышение 1-2",
+        "description": "1231",
+        "passPercent": 70,
+        "webhookUrl": "https://discord.com/api/webhooks/1484504132273311784/OeTVzXWHT1IKTfj7J8yFPUoBVz5BHSSsE5EtKjgU5wAVCNqxMsHLRCq66mBmMBL7om5g",
+        "questions": [
+          {
+            "id": "d70e7e33-28b6-4ca0-ba85-4a0a8a94e47e",
+            "text": "ё132ё",
+            "options": [
+              "12ё1",
+              "ё231ё13",
+              "134у3ё2"
+            ],
+            "correctIndex": 0
+          }
+        ],
+        "createdAt": "2026-03-21T11:26:52.847Z",
+        "updatedAt": "2026-03-21T11:26:52.847Z"
+      }
+    ],
+    "rosters": [
+      {
+        "id": "14db524f-e428-4868-adf4-34629287ac98",
+        "title": "Пидорасы",
+        "members": [],
+        "createdAt": "2026-03-21T11:27:39.813Z",
+        "updatedAt": "2026-03-21T13:20:25.927Z"
+      }
+    ],
+    "applications": []
+  }
+]

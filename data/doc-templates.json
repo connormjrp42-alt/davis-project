@@ -1,0 +1,109 @@
+[
+  {
+    "id": "b1b15839-1bff-4625-9915-7b3150bd6786",
+    "server": "New York",
+    "title": "Новый шаблон",
+    "description": "",
+    "createdBy": {
+      "id": "953290565838053466",
+      "name": "𝕮𝖔𝖓𝖓𝖔𝖗"
+    },
+    "createdAt": "2026-03-19T14:41:40.132Z",
+    "updatedAt": "2026-03-19T14:52:50.065Z",
+    "elements": [
+      {
+        "id": "el-1773931177594-21b8",
+        "type": "line",
+        "x": 2,
+        "y": 110,
+        "w": 790,
+        "h": 1,
+        "label": "Линия",
+        "text": "",
+        "placeholder": "",
+        "src": "",
+        "required": false,
+        "zIndex": 1,
+        "hidden": false,
+        "locked": false,
+        "style": {
+          "fontSize": 16,
+          "color": "#21183f",
+          "backgroundColor": "#000000",
+          "borderColor": "#000000",
+          "align": "left",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "borderWidth": 0,
+          "borderRadius": 0,
+          "opacity": 1,
+          "rotation": 0,
+          "lineHeight": 1.35,
+          "fontFamily": "Manrope"
+        }
+      },
+      {
+        "id": "el-1773931241662-74a6",
+        "type": "heading",
+        "x": 24,
+        "y": 44,
+        "w": 746,
+        "h": 86,
+        "label": "Заголовок",
+        "text": "Заголовок документа",
+        "placeholder": "",
+        "src": "",
+        "required": false,
+        "zIndex": 2,
+        "hidden": false,
+        "locked": false,
+        "style": {
+          "fontSize": 30,
+          "color": "#21183f",
+          "backgroundColor": "#ffffff",
+          "borderColor": "#c8bddf",
+          "align": "center",
+          "fontWeight": "700",
+          "fontStyle": "normal",
+          "borderWidth": 1,
+          "borderRadius": 6,
+          "opacity": 1,
+          "rotation": 0,
+          "lineHeight": 1.35,
+          "fontFamily": "Manrope"
+        }
+      },
+      {
+        "id": "el-1773931468701-196c",
+        "type": "signature",
+        "x": 590,
+        "y": 1040,
+        "w": 200,
+        "h": 60,
+        "label": "Подпись",
+        "text": "",
+        "placeholder": "Имя Фамилия",
+        "src": "",
+        "required": false,
+        "zIndex": 3,
+        "hidden": false,
+        "locked": false,
+        "style": {
+          "fontSize": 16,
+          "color": "#21183f",
+          "backgroundColor": "#ffffff",
+          "borderColor": "#c8bddf",
+          "align": "left",
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "borderWidth": 1,
+          "borderRadius": 6,
+          "opacity": 1,
+          "rotation": 0,
+          "lineHeight": 1.35,
+          "fontFamily": "Manrope"
+        }
+      }
+    ]
+  }
+]

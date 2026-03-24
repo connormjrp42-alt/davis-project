@@ -1,0 +1,23 @@
+[
+  {
+    "id": "8e7d57a3-c56a-4f15-ac2d-a46f34b6d1a2",
+    "label": "О проекте",
+    "type": "section",
+    "target": "#about",
+    "order": 1
+  },
+  {
+    "id": "128ea208-8a02-4d30-80f1-4fa0db8bca72",
+    "label": "Посты",
+    "type": "section",
+    "target": "#posts",
+    "order": 2
+  },
+  {
+    "id": "44ffd8ad-ccb6-4534-a667-75efa69394f0",
+    "label": "Направления",
+    "type": "section",
+    "target": "#roles",
+    "order": 3
+  }
+]

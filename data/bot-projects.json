@@ -1,0 +1,77 @@
+{
+  "953290565838053466": [
+    {
+      "id": "10a0e175-f450-4a58-8463-825d6f1df408",
+      "name": "Castro Bot",
+      "folderName": "castro-family-bot",
+      "botType": "family",
+      "prefix": "/",
+      "modules": [],
+      "clientId": "1485135322768605338",
+      "guildId": "1482122285052854372",
+      "familyApplications": {
+        "embedTitle": "Заявки в семью",
+        "embedDescription": "Нжамите кнопку ниже и заполните форму заявки.",
+        "embedFooter": "Davis Project",
+        "publishChannelId": "1482163200135790776",
+        "openButtonLabel": "Заполнить заявку",
+        "openButtonStyle": "secondary",
+        "questions": [
+          "Никнейм персонажа",
+          "Размер члена",
+          "Ориентация"
+        ],
+        "ticketCategoryId": "1482151490490728600",
+        "callChannelId": "1482153028604923914",
+        "approveRoleIds": [
+          "1482986942433071154",
+          "1482140160232652932"
+        ],
+        "reviewerRoleIds": [
+          "1482139062222716949"
+        ]
+      },
+      "contracts": {
+        "embedTitle": "Отчеты по контрактам",
+        "embedDescription": "Выберите контракт, прикрепите скриншот выполнения и отправьте отчет.",
+        "embedFooter": "Davis Project",
+        "publishChannelId": "1482151897950458051",
+        "reportChannelId": "1482151897950458051",
+        "openButtonLabel": "Отправить отчет",
+        "openButtonStyle": "primary",
+        "selectedContracts": [
+          "Товар со склада",
+          "Гровер I",
+          "Гровер II",
+          "Гровер III",
+          "Гровер IV",
+          "Гровер V",
+          "Металлургия I",
+          "Металлургия II",
+          "Металлургия III",
+          "Металлургия IV",
+          "Дары моря I",
+          "Дары моря II",
+          "Дары моря III",
+          "Дары моря IV",
+          "Дары моря V",
+          "Дары моря VI",
+          "Дары моря VII",
+          "Дары моря VIII"
+        ],
+        "reviewerRoleIds": []
+      },
+      "cloud": {
+        "connected": true,
+        "autoSync": false,
+        "connectedAt": "2026-03-22T04:34:32.002Z",
+        "lastSyncedAt": "2026-03-22T20:13:50.642Z",
+        "lastSyncError": "",
+        "botUserId": "1485135322768605338",
+        "botUsername": "Castro Bot"
+      },
+      "createdAt": "2026-03-21T11:04:04.535Z",
+      "updatedAt": "2026-03-22T20:15:06.821Z"
+    }
+  ]
+}
