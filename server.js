@@ -6436,14 +6436,22 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/api/settings', requireAuth, (req, res) => {
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
+    return res.status(401).json({ error: 'not_authenticated' });
+  }
   if (!req.session.settings) {
-    req.session.settings = getDefaultSettings(req.session.user);
+    req.session.settings = getDefaultSettings(authUser);
   }
 
   return res.json({ settings: req.session.settings });
 });
 
 app.post('/api/settings', requireAuth, (req, res) => {
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
+    return res.status(401).json({ error: 'not_authenticated' });
+  }
   const { displayName, rolePath, preferredSection, notificationsEnabled } = req.body || {};
   const validRolePath = ['newbie', 'state', 'crime'];
   const validSection = ['guides', 'jobs', 'discord'];
@@ -6452,7 +6460,7 @@ app.post('/api/settings', requireAuth, (req, res) => {
     displayName:
       typeof displayName === 'string' && displayName.trim()
         ? displayName.trim().slice(0, 50)
-        : getDefaultSettings(req.session.user).displayName,
+        : getDefaultSettings(authUser).displayName,
     rolePath: validRolePath.includes(rolePath) ? rolePath : 'newbie',
     preferredSection: validSection.includes(preferredSection) ? preferredSection : 'guides',
     notificationsEnabled: Boolean(notificationsEnabled),
@@ -6865,6 +6873,9 @@ app.delete('/api/admin/pages/:slug', requireAdmin, (req, res) => {
 });
 
 app.get('/auth/discord', (req, res) => {
+  if (resolveAuthenticatedUser(req)) {
+    return res.redirect('/dashboard');
+  }
   if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
     return res.status(500).send('Discord OAuth не настроен. Проверьте .env');
   }
@@ -6961,7 +6972,7 @@ app.get('/auth/discord/callback', async (req, res) => {
             path: '/',
           });
         }
-        return res.redirect('/');
+        return res.redirect('/dashboard');
       });
     });
   } catch (error) {
