@@ -4190,6 +4190,9 @@ async function requireFactionManage(req, res) {
 }
 
 app.get('/api/me', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   const authUser = resolveAuthenticatedUser(req);
   if (!authUser) {
     return res.json({ authenticated: false });
@@ -6427,6 +6430,9 @@ app.get('/bot-builder/contracts/:id', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   const authUser = resolveAuthenticatedUser(req);
   if (!authUser) {
     return res.redirect('/');
@@ -6436,6 +6442,9 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/api/settings', requireAuth, (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   const authUser = resolveAuthenticatedUser(req);
   if (!authUser) {
     return res.status(401).json({ error: 'not_authenticated' });
