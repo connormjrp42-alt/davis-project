@@ -4110,8 +4110,23 @@ app.use((req, res, next) => {
   return next();
 });
 
+function resolveAuthenticatedUser(req) {
+  const sessionUser = req.session?.user;
+  if (sessionUser?.id) return sessionUser;
+  const cookies = parseCookieHeader(req.headers?.cookie || '');
+  const restoredUser = verifySignedAuthCookieValue(cookies[AUTH_COOKIE_NAME]);
+  if (restoredUser && req.session) {
+    req.session.user = restoredUser;
+    if (!req.session.settings) {
+      req.session.settings = getDefaultSettings(restoredUser);
+    }
+  }
+  return restoredUser || null;
+}
+
 function requireAuth(req, res, next) {
-  if (!req.session.user) {
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
     return res.status(401).json({ error: 'not_authenticated' });
   }
 
@@ -4175,15 +4190,16 @@ async function requireFactionManage(req, res) {
 }
 
 app.get('/api/me', (req, res) => {
-  if (!req.session.user) {
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
     return res.json({ authenticated: false });
   }
 
   return res.json({
     authenticated: true,
-    isAdmin: isAdminUser(req.session.user),
-    canManageDocTemplates: canManageDocTemplates(req.session.user),
-    user: req.session.user,
+    isAdmin: isAdminUser(authUser),
+    canManageDocTemplates: canManageDocTemplates(authUser),
+    user: authUser,
   });
 });
 
@@ -6411,7 +6427,8 @@ app.get('/bot-builder/contracts/:id', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-  if (!req.session.user) {
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
     return res.redirect('/');
   }
 
