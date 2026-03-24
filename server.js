@@ -3797,7 +3797,39 @@ let botProjectsStore = normalizeBotProjectsStore(readJSON(BOT_PROJECTS_FILE, {})
 let botProjectSecretsStore = normalizeBotProjectSecretsStore(readJSON(BOT_PROJECT_SECRETS_FILE, {}));
 let botFamilyApplicationsStore = normalizeBotFamilyApplicationsStore(readJSON(BOT_FAMILY_APPLICATIONS_FILE, {}));
 let botContractReportsStore = normalizeBotContractReportsStore(readJSON(BOT_CONTRACT_REPORTS_FILE, {}));
-const oauthStateStore = new Map();
+function createSignedOAuthState() {
+  const issuedAt = Date.now().toString(36);
+  const nonce = crypto.randomBytes(10).toString('hex');
+  const payload = `${issuedAt}.${nonce}`;
+  const signature = crypto.createHmac('sha256', SESSION_SECRET || 'dev-secret-change-me').update(payload).digest('hex');
+  return `${payload}.${signature}`;
+}
+
+function verifySignedOAuthState(stateValue) {
+  const raw = sanitizeText(stateValue, 400);
+  if (!raw) return { ok: false, reason: 'empty' };
+  const parts = raw.split('.');
+  if (parts.length !== 3) return { ok: false, reason: 'format' };
+
+  const [issuedAtBase36, nonce, signature] = parts;
+  if (!issuedAtBase36 || !nonce || !signature) return { ok: false, reason: 'format' };
+  if (!/^[a-z0-9]+$/i.test(issuedAtBase36)) return { ok: false, reason: 'timestamp' };
+  if (!/^[a-f0-9]{20}$/i.test(nonce)) return { ok: false, reason: 'nonce' };
+  if (!/^[a-f0-9]{64}$/i.test(signature)) return { ok: false, reason: 'signature' };
+
+  const issuedAt = parseInt(issuedAtBase36, 36);
+  if (!Number.isFinite(issuedAt) || issuedAt <= 0) return { ok: false, reason: 'timestamp' };
+  if (Date.now() - issuedAt > OAUTH_STATE_TTL_MS) return { ok: false, reason: 'expired' };
+
+  const payload = `${issuedAtBase36}.${nonce}`;
+  const expected = crypto.createHmac('sha256', SESSION_SECRET || 'dev-secret-change-me').update(payload).digest('hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  const providedBuf = Buffer.from(signature, 'hex');
+  if (expectedBuf.length !== providedBuf.length) return { ok: false, reason: 'signature' };
+  if (!crypto.timingSafeEqual(expectedBuf, providedBuf)) return { ok: false, reason: 'signature' };
+
+  return { ok: true };
+}
 const consultantSyncState = {
   enabled: CONSULTANT_SYNC_ENABLED,
   intervalMinutes: CONSULTANT_SYNC_INTERVAL_MINUTES,
@@ -3967,6 +3999,8 @@ function startConsultantBackgroundSync() {
   }
 }
 
+app.set('trust proxy', 1);
+
 app.use(
   session({
     secret: SESSION_SECRET || 'dev-secret-change-me',
@@ -3975,7 +4009,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
@@ -6726,17 +6760,7 @@ app.get('/auth/discord', (req, res) => {
     return res.status(500).send('Discord OAuth не настроен. Проверьте .env');
   }
 
-  const state = crypto.randomBytes(16).toString('hex');
-  oauthStateStore.set(state, {
-    createdAt: Date.now(),
-  });
-
-  // Housekeeping for expired states.
-  for (const [savedState, row] of oauthStateStore.entries()) {
-    if (Date.now() - row.createdAt > OAUTH_STATE_TTL_MS) {
-      oauthStateStore.delete(savedState);
-    }
-  }
+  const state = createSignedOAuthState();
 
   const params = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
@@ -6757,14 +6781,9 @@ app.get('/auth/discord/callback', async (req, res) => {
     return res.status(500).send('Discord OAuth не настроен. Проверьте .env');
   }
 
-  const savedState = typeof state === 'string' ? oauthStateStore.get(state) : null;
-  if (!code || !state || !savedState) {
+  const stateCheck = verifySignedOAuthState(typeof state === 'string' ? state : '');
+  if (!code || !state || !stateCheck.ok) {
     return res.status(400).send('Невалидный OAuth state. Попробуйте снова.');
-  }
-
-  if (Date.now() - savedState.createdAt > OAUTH_STATE_TTL_MS) {
-    oauthStateStore.delete(state);
-    return res.status(400).send('OAuth state устарел. Попробуйте снова.');
   }
 
   try {
@@ -6813,7 +6832,6 @@ app.get('/auth/discord/callback', async (req, res) => {
     req.session.settings = getDefaultSettings(req.session.user);
     upsertParticipant(req.session.user);
 
-    oauthStateStore.delete(state);
     return res.redirect('/');
   } catch (error) {
     return res.status(500).send(`Ошибка авторизации Discord: ${error.message}`);
