@@ -21,7 +21,8 @@ async function initDashboard() {
   try {
     const me = await getJSON('/api/me');
     if (!me.authenticated) {
-      window.location.href = '/';
+      accountName.textContent = 'Авторизация не завершена.';
+      status.innerHTML = 'Не удалось подтвердить вход через Discord. <a href="/auth/discord">Попробовать снова</a>.';
       return;
     }
 
