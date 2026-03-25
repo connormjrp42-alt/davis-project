@@ -231,6 +231,13 @@
     return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
   }
 
+  function extractDiscordUserIdFromProfileUrl(value) {
+    const url = String(value || '').trim();
+    if (!/^https?:\/\//i.test(url)) return '';
+    const match = url.match(/discord(?:app)?\.com\/users\/(\d{5,30})/i);
+    return match ? String(match[1]) : '';
+  }
+
   function createDiscordUserCard(options = {}) {
     const displayName = String(options.displayName || '').trim() || 'Профиль Discord';
     const username = String(options.username || '').trim();
@@ -597,8 +604,10 @@
     const leaderName = String(leaderDiscordData?.displayName || profile.leader || '').trim();
     if (el.mainLeader) el.mainLeader.textContent = leaderName ? `Лидер: ${leaderName}` : 'Лидер не указан';
     const leaderDiscordId = String(profile.leaderDiscordId || '').trim();
-    const leaderResolvedId = leaderDiscordId || String(leaderDiscordData?.id || '').trim();
-    const explicitLeaderProfileUrl = String(profile.leaderDiscordProfileUrl || '').trim() || leaderDiscordData?.profileUrl || '';
+    const profileLeaderUrlRaw = String(profile.leaderDiscordProfileUrl || '').trim();
+    const leaderProfileId = extractDiscordUserIdFromProfileUrl(profileLeaderUrlRaw);
+    const leaderResolvedId = leaderDiscordId || String(leaderDiscordData?.id || '').trim() || leaderProfileId;
+    const explicitLeaderProfileUrl = profileLeaderUrlRaw || leaderDiscordData?.profileUrl || '';
     if (el.mainLeaderDiscordId) {
       el.mainLeaderDiscordId.textContent = leaderResolvedId ? `Discord ID: ${leaderResolvedId}` : '';
       el.mainLeaderDiscordId.hidden = !leaderResolvedId;
@@ -632,7 +641,7 @@
             status: leaderDiscordData?.status || '',
             discordId: leaderResolvedId,
             profileUrl: leaderProfileUrl,
-            avatarUrl: leaderDiscordData?.avatarUrl || (leaderResolvedId ? getDiscordFallbackAvatar(leaderResolvedId) : ''),
+              avatarUrl: leaderDiscordData?.avatarUrl || (leaderResolvedId ? getDiscordFallbackAvatar(leaderResolvedId) : ''),
           })
         );
         el.mainLeaderDiscordCard.hidden = false;
@@ -659,15 +668,19 @@
           const li = document.createElement('li');
           li.className = 'faction-main-deputy-item';
           const deputyDiscord = entry.discordData && typeof entry.discordData === 'object' ? entry.discordData : null;
-          const deputyProfileUrl = deputyDiscord?.profileUrl || entry.discordProfileUrl || (entry.discordId ? `https://discord.com/users/${entry.discordId}` : '');
+          const deputyProfileUrlRaw = String(entry.discordProfileUrl || '').trim();
+          const deputyProfileId = extractDiscordUserIdFromProfileUrl(deputyProfileUrlRaw);
+          const deputyResolvedId = String(entry.discordId || '').trim() || String(deputyDiscord?.id || '').trim() || deputyProfileId;
+          const deputyProfileUrl =
+            deputyDiscord?.profileUrl || deputyProfileUrlRaw || (deputyResolvedId ? `https://discord.com/users/${deputyResolvedId}` : '');
           li.append(
             createDiscordUserCard({
               displayName: deputyDiscord?.displayName || entry.name,
               username: deputyDiscord?.username || '',
               status: deputyDiscord?.status || '',
-              discordId: entry.discordId,
+              discordId: deputyResolvedId,
               profileUrl: deputyProfileUrl,
-              avatarUrl: deputyDiscord?.avatarUrl || (entry.discordId ? getDiscordFallbackAvatar(entry.discordId) : ''),
+              avatarUrl: deputyDiscord?.avatarUrl || (deputyResolvedId ? getDiscordFallbackAvatar(deputyResolvedId) : ''),
               compact: true,
             })
           );
