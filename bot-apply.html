@@ -1,0 +1,170 @@
+﻿<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Davis Project | Заявка</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .apply-wrap {
+        max-width: 840px;
+        margin: 34px auto;
+      }
+
+      .apply-card {
+        display: grid;
+        gap: 16px;
+        opacity: 0;
+        transform: translateY(8px) scale(0.995);
+        animation: applyCardIn 0.35s ease-out forwards;
+      }
+
+      .apply-card h1 {
+        margin: 0;
+        font-size: clamp(1.55rem, 2.5vw, 2.05rem);
+        letter-spacing: 0.02em;
+        line-height: 1.18;
+      }
+
+      .apply-card .consultant-subtitle {
+        margin: 0;
+        font-size: 1.02rem;
+        line-height: 1.6;
+        color: rgba(236, 226, 255, 0.9);
+      }
+
+      .apply-card label {
+        display: grid;
+        gap: 9px;
+        opacity: 0;
+        transform: translateY(6px);
+        animation: applyFieldIn 0.3s ease-out forwards;
+      }
+
+      #applyQuestions {
+        display: grid;
+        gap: 14px;
+      }
+
+      .apply-question-label {
+        padding: 12px;
+        border: 1px solid rgba(194, 156, 255, 0.24);
+        border-radius: 14px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+      }
+
+      .apply-question-title {
+        display: block;
+        font-size: 0.96rem;
+        font-weight: 700;
+        color: rgba(244, 236, 255, 0.97);
+        letter-spacing: 0.01em;
+      }
+
+      .apply-card textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        font: inherit;
+        padding: 10px 12px;
+        min-height: 96px;
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .apply-card textarea:focus-visible {
+        border-color: rgba(169, 124, 255, 0.9);
+        box-shadow: 0 0 0 2px rgba(159, 72, 255, 0.22);
+        transform: translateY(-1px);
+      }
+
+      .apply-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(194, 156, 255, 0.16);
+      }
+
+      #applySubmitBtn {
+        min-height: 44px;
+        padding-left: 22px;
+        padding-right: 22px;
+        letter-spacing: 0.01em;
+      }
+
+      .apply-status {
+        min-height: 1.2em;
+        transition: opacity 0.2s ease;
+      }
+
+      @keyframes applyCardIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.995);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes applyFieldIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #applyQuestions > label:nth-child(1) {
+        animation-delay: 0.03s;
+      }
+      #applyQuestions > label:nth-child(2) {
+        animation-delay: 0.06s;
+      }
+      #applyQuestions > label:nth-child(3) {
+        animation-delay: 0.09s;
+      }
+      #applyQuestions > label:nth-child(4) {
+        animation-delay: 0.12s;
+      }
+      #applyQuestions > label:nth-child(5) {
+        animation-delay: 0.15s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="noise"></div>
+
+    <main class="container apply-wrap">
+      <section class="card apply-card">
+        <h1 id="applyTitle">Загрузка...</h1>
+        <p id="applySubtitle" class="consultant-subtitle">Подождите, загружаю форму заявки.</p>
+        <form id="applyForm" hidden>
+          <div id="applyQuestions"></div>
+          <div class="apply-actions">
+            <button id="applySubmitBtn" class="cta cta-primary" type="submit">Отправить заявку</button>
+          </div>
+        </form>
+        <p id="applyStatus" class="apply-status"></p>
+      </section>
+    </main>
+
+    <script src="/bot-apply.js"></script>
+  </body>
+</html>

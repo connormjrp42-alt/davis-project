@@ -1,0 +1,386 @@
+﻿<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Davis Project | Создание бота</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="noise"></div>
+
+    <header class="header container">
+      <a class="brand" href="/">
+        <img class="brand-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+        <span class="brand-text">Davis <span>Project</span></span>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="/">Главная</a>
+        <a href="/consultant">Консультант</a>
+        <a href="/documentflow">Документооборот</a>
+        <a href="/factions">Фракции</a>
+        <a href="/bot-builder" class="active">Создание бота</a>
+      </nav>
+      <a class="discord-btn" href="/auth/discord">Войти через Discord</a>
+    </header>
+
+    <main class="container bot-builder-page">
+      <section class="card bot-builder-hero">
+        <h1>Создание Discord-бота</h1>
+        <p>
+          Соберите готового бота для семьи или фракции. Настройки сохраняются в облаке и синхронизируются
+          через сайт без ручной работы с файлами.
+        </p>
+      </section>
+
+      <section class="card bot-guide-card">
+        <h2>Руководство по созданию</h2>
+        <p class="bot-guide-subtitle">Короткий путь, чтобы бот сразу заработал без ошибок.</p>
+        <ol class="bot-guide-steps">
+          <li>
+            <strong>Создайте приложение в Discord Developer Portal.</strong>
+            В разделе <code>Bot</code> нажмите <code>Add Bot</code>, затем скопируйте токен.
+          </li>
+          <li>
+            <strong>Подготовьте доступы.</strong>
+            Скопируйте <code>Application ID</code> (это <code>CLIENT_ID</code>) и при желании ID сервера
+            (<code>GUILD_ID</code>) для быстрой регистрации команд.
+          </li>
+          <li>
+            <strong>Создайте проект через плитку <code>+ Создать бота</code>.</strong>
+            Заполните поля и нажмите кнопку сохранения настроек.
+          </li>
+          <li>
+            <strong>Подключите облачный режим.</strong>
+            Укажите <code>BOT_TOKEN</code> и нажмите <code>Подключить бота</code>. Файлы скачивать не нужно.
+          </li>
+          <li>
+            <strong>Проверьте в Discord.</strong>
+            Нажмите <code>Синхронизировать</code> и <code>Опубликовать эмбед</code>, чтобы проверить доступ к каналу.
+          </li>
+        </ol>
+        <p class="bot-guide-note">
+          Важно: никому не передавайте <code>BOT_TOKEN</code>. Если токен утек — сразу сбросьте его в Developer Portal.
+        </p>
+      </section>
+
+      <section class="card bot-manager-board">
+        <h2>Управление ботами</h2>
+        <p class="bot-manager-subtitle">
+          Нажмите <strong>+ Создать бота</strong>, чтобы добавить плитку. Конструктор открывается только
+          при переходе в плитку конкретного бота. Список ботов хранится на сайте и привязан к вашему Discord-аккаунту.
+        </p>
+        <div class="bot-manager-toolbar">
+          <label class="bot-manager-search">
+            Поиск
+            <input
+              id="botProjectSearchInput"
+              type="search"
+              maxlength="120"
+              placeholder="Название бота, тип или статус облака"
+            />
+          </label>
+          <div class="bot-manager-filters" id="botProjectFilters">
+            <button type="button" class="bot-filter-btn active" data-filter="all">Все</button>
+            <button type="button" class="bot-filter-btn" data-filter="connected">Подключенные</button>
+            <button type="button" class="bot-filter-btn" data-filter="disconnected">Не подключенные</button>
+          </div>
+        </div>
+        <div id="botProjectGrid" class="bot-project-grid"></div>
+        <p id="botManagerStatus" class="factions-status"></p>
+      </section>
+
+      <section id="botBuilderPanel" class="bot-builder-layout" hidden>
+        <form id="botBuilderForm" class="card bot-builder-form">
+          <div class="bot-builder-headline">
+            <h2 id="botBuilderTitle">Создание бота</h2>
+            <button id="botBuilderCancelBtn" class="cta cta-ghost" type="button">Закрыть</button>
+          </div>
+
+          <div id="botBuilderQuickNav" class="bot-builder-quicknav">
+            <button type="button" class="bot-builder-quicknav-btn active" data-target="botSectionBase">1. Основное</button>
+            <button type="button" class="bot-builder-quicknav-btn" data-target="botSectionCloud">2. Облако</button>
+            <button type="button" class="bot-builder-quicknav-btn" data-target="botSectionFamily">3. Функции</button>
+            <button type="button" class="bot-builder-quicknav-btn" data-target="botSectionActions">4. Действия</button>
+          </div>
+          <div id="botBuilderChecklist" class="bot-builder-checklist">
+            <span class="bot-check-item" data-check="base">Основное</span>
+            <span class="bot-check-item" data-check="cloud">Облако</span>
+            <span class="bot-check-item" data-check="family">Функции</span>
+            <span class="bot-check-item" data-check="actions">Готово</span>
+          </div>
+          <p id="botBuilderLiveStatus" class="bot-builder-live-status">Статус: без изменений</p>
+
+          <section id="botSectionBase" class="bot-builder-section">
+            <h3>1. Основные настройки</h3>
+            <div class="bot-form-grid bot-form-grid-2">
+              <label>
+                Название бота
+                <input id="botNameInput" type="text" maxlength="80" placeholder="Например: Davis Family Bot" required />
+              </label>
+
+              <label>
+                Имя папки проекта
+                <input id="botFolderInput" type="text" maxlength="80" placeholder="Например: davis-family-bot" />
+              </label>
+
+              <label>
+                Тип бота
+                <select id="botTypeInput">
+                  <option value="family">Для семьи</option>
+                  <option value="faction">Для фракции</option>
+                </select>
+              </label>
+
+              <label>
+                Префикс обычных команд (необязательно)
+                <input id="botPrefixInput" type="text" maxlength="4" value="!" />
+              </label>
+            </div>
+
+          <details class="bot-env-details">
+            <summary>Discord-настройки (чтобы бот сразу запускался)</summary>
+            <div class="bot-form-grid bot-form-grid-2">
+              <label class="bot-form-grid-span-2">
+                BOT_TOKEN
+                <input id="botTokenInput" type="password" maxlength="300" placeholder="Токен вашего Discord-бота" />
+              </label>
+              <label>
+                CLIENT_ID (Application ID, необязательно)
+                <input
+                  id="botClientIdInput"
+                  type="text"
+                  maxlength="40"
+                  placeholder="Можно оставить пустым: бот попробует определить ID сам"
+                />
+              </label>
+              <label>
+                GUILD_ID (необязательно, для быстрого появления команд)
+                <input id="botGuildIdInput" type="text" maxlength="40" placeholder="ID вашего Discord-сервера" />
+              </label>
+            </div>
+          </details>
+          </section>
+
+          <section id="botSectionCloud" class="bot-builder-section bot-cloud-settings">
+            <h3>Облачный режим (без файлов)</h3>
+            <p class="bot-builder-hint">
+              Подключите BOT_TOKEN один раз: после этого настройки будут храниться на сайте и синхронизироваться автоматически.
+            </p>
+            <label class="bot-cloud-autosync">
+              <input id="botCloudAutoSyncInput" type="checkbox" checked />
+              Автосинхронизация после сохранения
+            </label>
+            <div class="bot-builder-actions">
+              <button id="botCloudConnectBtn" class="cta cta-primary" type="button">Подключить бота</button>
+              <button id="botCloudSyncBtn" class="cta cta-ghost" type="button">Синхронизировать</button>
+              <button id="botCloudDisconnectBtn" class="cta cta-ghost" type="button">Отключить</button>
+            </div>
+            <p id="botCloudStatus" class="factions-status"></p>
+          </section>
+
+          <section id="botSectionFamily" class="bot-builder-section bot-family-settings">
+            <h3>3. Функционал бота</h3>
+            <div id="botFeatureTabs" class="bot-feature-tabs">
+              <button type="button" class="bot-feature-tab active" data-feature-tab="applications">Заявки</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="contracts">Контракты</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="logs">Логи</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="reports">Повышения</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="inventory">Склад</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="finance">Финансы</button>
+              <button type="button" class="bot-feature-tab" data-feature-tab="roster">Состав</button>
+            </div>
+
+            <section class="bot-feature-panel active" data-feature-panel="applications">
+              <p class="bot-builder-hint">Форма заявки заполняется на сайте, а модерация идет через кнопки в Discord-эмбеде.</p>
+              <div class="bot-form-grid bot-form-grid-2">
+                <label>
+                  Заголовок embed
+                  <input id="familyEmbedTitleInput" type="text" maxlength="150" placeholder="Заявки в семью" />
+                </label>
+                <label>
+                  Подтекст embed (footer)
+                  <input id="familyEmbedFooterInput" type="text" maxlength="120" placeholder="Davis Project" />
+                </label>
+                <label class="bot-form-grid-span-2">
+                  Текст embed
+                  <textarea
+                    id="familyEmbedTextInput"
+                    rows="4"
+                    maxlength="4000"
+                    placeholder="Нажмите кнопку ниже и заполните форму заявки."
+                  ></textarea>
+                </label>
+                <label>
+                  ID канала для публикации embed
+                  <input id="familyPublishChannelIdInput" type="text" maxlength="40" placeholder="123456789012345678" />
+                </label>
+                <label>
+                  Название кнопки открытия формы
+                  <input id="familyOpenButtonLabelInput" type="text" maxlength="80" placeholder="Открыть форму" />
+                </label>
+                <label>
+                  Цвет кнопки
+                  <select id="familyOpenButtonStyleInput">
+                    <option value="primary">Фиолетовая (Primary)</option>
+                    <option value="success">Зеленая (Success)</option>
+                    <option value="danger">Красная (Danger)</option>
+                    <option value="secondary">Серая (Secondary)</option>
+                  </select>
+                </label>
+                <label>
+                  ID категории для каналов заявок
+                  <input id="familyTicketCategoryIdInput" type="text" maxlength="40" placeholder="123456789012345678" />
+                </label>
+                <label>
+                  ID канала для обзвона
+                  <input id="familyCallChannelIdInput" type="text" maxlength="40" placeholder="123456789012345678" />
+                </label>
+                <label class="bot-form-grid-span-2">
+                  Вопросы формы (каждый вопрос с новой строки, максимум 5)
+                  <textarea
+                    id="familyQuestionsInput"
+                    rows="5"
+                    placeholder="Ваш ник в игре&#10;Ваш возраст&#10;Почему хотите вступить в семью?"
+                  ></textarea>
+                </label>
+                <label>
+                  Роли при одобрении (ID, каждая с новой строки)
+                  <textarea id="familyApproveRoleIdsInput" rows="4" placeholder="123456789012345678"></textarea>
+                </label>
+                <label>
+                  Роли модераторов заявок (ID, каждая с новой строки)
+                  <textarea id="familyReviewerRoleIdsInput" rows="4" placeholder="123456789012345678"></textarea>
+                </label>
+              </div>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="contracts">
+              <p class="bot-builder-hint">
+                Настройте форму отчета по контрактам: выберите доступные контракты, канал отчетов и публикуемый embed.
+              </p>
+              <div class="bot-form-grid bot-form-grid-2">
+                <label>
+                  Заголовок embed
+                  <input id="contractEmbedTitleInput" type="text" maxlength="150" placeholder="Отчеты по контрактам" />
+                </label>
+                <label>
+                  Подтекст embed (footer)
+                  <input id="contractEmbedFooterInput" type="text" maxlength="120" placeholder="Davis Project" />
+                </label>
+                <label class="bot-form-grid-span-2">
+                  Текст embed
+                  <textarea
+                    id="contractEmbedTextInput"
+                    rows="4"
+                    maxlength="4000"
+                    placeholder="Выберите контракт, прикрепите скриншот выполнения и отправьте отчет."
+                  ></textarea>
+                </label>
+                <label>
+                  ID канала для публикации embed
+                  <input id="contractPublishChannelIdInput" type="text" maxlength="40" placeholder="123456789012345678" />
+                </label>
+                <label>
+                  ID канала для отчетов
+                  <input id="contractReportChannelIdInput" type="text" maxlength="40" placeholder="123456789012345678" />
+                </label>
+                <label>
+                  Название кнопки открытия формы
+                  <input id="contractOpenButtonLabelInput" type="text" maxlength="80" placeholder="Отправить отчет" />
+                </label>
+                <label>
+                  Цвет кнопки
+                  <select id="contractOpenButtonStyleInput">
+                    <option value="primary">Фиолетовая (Primary)</option>
+                    <option value="success">Зеленая (Success)</option>
+                    <option value="danger">Красная (Danger)</option>
+                    <option value="secondary">Серая (Secondary)</option>
+                  </select>
+                </label>
+                <label class="bot-form-grid-span-2">
+                  Роли для уведомления об отчетах (ID, каждая с новой строки)
+                  <textarea id="contractReviewerRoleIdsInput" rows="4" placeholder="123456789012345678"></textarea>
+                </label>
+              </div>
+
+              <div class="bot-contracts-picker">
+                <div class="bot-contracts-picker-head">
+                  <h4>Список контрактов из таблицы</h4>
+                  <div class="bot-contracts-picker-actions">
+                    <button id="contractSelectAllBtn" class="cta cta-ghost cta-mini" type="button">Выбрать все</button>
+                    <button id="contractClearAllBtn" class="cta cta-ghost cta-mini" type="button">Очистить</button>
+                  </div>
+                </div>
+                <div id="contractCatalogWrap" class="bot-contracts-grid"></div>
+                <p class="bot-builder-hint">Выбрано контрактов: <strong id="contractSelectedCount">0</strong></p>
+              </div>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="logs">
+              <article class="bot-feature-coming">
+                <h4>Логи сервера</h4>
+                <p>Раздел подготовлен. Здесь появится подключение логов, фильтров и каналов публикации.</p>
+              </article>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="reports">
+              <article class="bot-feature-coming">
+                <h4>Отчеты на повышение</h4>
+                <p>Раздел подготовлен. Здесь появятся формы отчетов и автоматическая проверка критериев.</p>
+              </article>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="inventory">
+              <article class="bot-feature-coming">
+                <h4>Складовой учет</h4>
+                <p>Раздел подготовлен. Здесь появится учет выдачи, приемки и инвентаризации.</p>
+              </article>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="finance">
+              <article class="bot-feature-coming">
+                <h4>Финансовый учет</h4>
+                <p>Раздел подготовлен. Здесь появятся шаблоны финансовых операций и отчеты.</p>
+              </article>
+            </section>
+
+            <section class="bot-feature-panel" data-feature-panel="roster">
+              <article class="bot-feature-coming">
+                <h4>Состав</h4>
+                <p>Раздел подготовлен. Здесь появится управление составом, рангами и кадровыми действиями.</p>
+              </article>
+            </section>
+          </section>
+
+          <section id="botSectionActions" class="bot-builder-section">
+            <h3>4. Действия</h3>
+            <p class="bot-builder-hint">Когда все поля заполнены, сохраните проект и при необходимости сразу публикуйте эмбед в Discord.</p>
+            <h3>Сводка текущих модулей</h3>
+            <div id="botModulesGrid" class="bot-modules-grid"></div>
+
+            <div class="bot-builder-actions bot-builder-actions-sticky">
+              <button class="cta cta-primary" type="submit">Сохранить настройки</button>
+              <button id="publishFamilyEmbedBtn" class="cta cta-ghost" type="button">Опубликовать эмбед</button>
+              <button id="publishContractsEmbedBtn" class="cta cta-ghost" type="button">Опубликовать контракты</button>
+            </div>
+          </section>
+          <p id="botBuilderStatus" class="factions-status"></p>
+        </form>
+      </section>
+    </main>
+
+    <script src="/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="/bot-builder.js"></script>
+  </body>
+</html>
+

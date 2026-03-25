@@ -1,0 +1,133 @@
+﻿<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Davis Project | Majestic RP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="noise"></div>
+
+    <header class="header container">
+      <a class="brand" href="/">
+        <img class="brand-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+        <span class="brand-text">Davis <span>Project</span></span>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="/">Главная</a>
+        <a href="/consultant">Консультант</a>
+        <a href="/documentflow">Документооборот</a>
+        <a href="/factions">Фракции</a>
+        <a href="/bot-builder">Создание бота</a>
+      </nav>
+      <a class="discord-btn" href="/auth/discord">Войти через Discord</a>
+    </header>
+
+    <main>
+      <section class="hero container reveal">
+        <div class="hero-content">
+          <p class="badge" data-edit-id="heroBadge">Majestic RP</p>
+          <h1 data-edit-id="heroTitleMain">
+            Davis Project для тех,
+            <span data-edit-id="heroTitleAccent">кто хочет начать уверенно</span>
+          </h1>
+          <p class="hero-text" data-edit-id="heroText">
+            Поддержка для новичков, госслужащих и игроков криминальных фракций: гайды, обучение, маршруты развития и живая помощь.
+          </p>
+          <div class="hero-actions">
+            <a class="cta cta-primary" href="/auth/discord">Вход через Discord</a>
+            <a class="cta cta-ghost" href="#help">Смотреть возможности</a>
+          </div>
+        </div>
+
+        <div class="hero-logo-stage">
+          <img class="hero-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+        </div>
+      </section>
+
+      <section id="about" class="section container reveal">
+        <h2 data-edit-id="aboutTitle">Что дает Davis Project</h2>
+        <div class="cards">
+          <article class="card">
+            <h3 data-edit-id="aboutCard1Title">Быстрый старт</h3>
+            <p data-edit-id="aboutCard1Text">Пошаговые инструкции по началу игры на Majestic RP без лишней воды.</p>
+          </article>
+          <article class="card">
+            <h3 data-edit-id="aboutCard2Title">Проверенные стратегии</h3>
+            <p data-edit-id="aboutCard2Text">Рабочие сценарии прогресса для разных ролей: госструктуры и криминал.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="posts" class="section container reveal">
+        <h2 data-edit-id="postsTitle">Посты проекта</h2>
+        <div id="postsGrid" class="posts-grid"></div>
+      </section>
+
+      <section id="server-info" class="section container reveal">
+        <h2 id="serverTitle" data-edit-id="serverTitle">Информация сервера</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Анонс</h3>
+            <p id="serverAnnouncement" data-edit-id="serverAnnouncement">Ежедневные ивенты, поддержка игроков и свежие RP-гайды доступны в Davis Project.</p>
+          </article>
+          <article class="card">
+            <h3>Как начать</h3>
+            <p id="serverHowToStart" data-edit-id="serverHowToStart">1) Войти через Discord  2) Выбрать направление  3) Следовать персональному плану развития.</p>
+          </article>
+          <article class="card">
+            <h3>Контакты</h3>
+            <p id="serverContacts" data-edit-id="serverContacts">Discord администратора: connordavis42</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="roles" class="section container reveal">
+        <h2 data-edit-id="rolesTitle">Кому подойдёт</h2>
+        <div class="roles-grid">
+          <article class="role role-newbie">
+            <h3>Новички</h3>
+            <p id="roleNewbie" data-edit-id="roleNewbie">Гайды по интерфейсу, заработку, первым квестам и безопасному развитию.</p>
+          </article>
+          <article class="role role-state">
+            <h3>Госслужащие</h3>
+            <p id="roleState" data-edit-id="roleState">Ролевые шаблоны, карьерные пути, дисциплина и взаимодействие в структурах.</p>
+          </article>
+          <article class="role role-crime">
+            <h3>Криминальные игроки</h3>
+            <p id="roleCrime" data-edit-id="roleCrime">Тактики, командная координация, RP-этика и минимизация рисков на сервере.</p>
+          </article>
+        </div>
+      </section>
+
+      <div id="dynamicTabsRoot"></div>
+
+      <section id="help" class="section container reveal">
+        <div class="help-wrap">
+          <h2 data-edit-id="helpTitle">Начни с Discord</h2>
+          <p data-edit-id="helpText">
+            Авторизуйся через Discord, чтобы получить доступ к личному кабинету, материалам и новым разделам.
+          </p>
+          <img class="help-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+          <a class="cta cta-primary" href="/auth/discord">Подключить аккаунт</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer container">
+      <img class="footer-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+      <p data-edit-id="footerText">Davis Project</p>
+    </footer>
+
+    <script src="/main.js"></script>
+  </body>
+</html>
