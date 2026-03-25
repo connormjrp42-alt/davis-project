@@ -3353,6 +3353,127 @@ h1 span {
   top: calc(50% - 5px);
 }
 
+.docflow-page-full {
+  width: calc(100vw - 20px);
+  max-width: none;
+  margin: 22px auto 34px;
+  padding: 0 10px;
+  display: grid;
+  gap: 12px;
+}
+
+.docflow-page-full .docflow-top {
+  padding: 18px 20px;
+}
+
+.docflow-panel-title {
+  margin: 0 0 2px;
+  font-size: 1rem;
+  color: #f3e9ff;
+}
+
+.docflow-page-full .docflow-layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.docflow-page-full .docflow-sidebar {
+  max-height: calc(100vh - 132px);
+  top: 10px;
+  padding: 14px;
+}
+
+.docflow-page-full .docflow-template-list {
+  max-height: calc(100vh - 300px);
+}
+
+.docflow-page-full .docflow-work {
+  min-height: calc(100vh - 132px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+
+.docflow-page-full .docflow-editor {
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr;
+  min-height: 0;
+}
+
+.docflow-page-full .docflow-builder-grid {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 12px;
+}
+
+.docflow-page-full .docflow-canvas-wrap {
+  min-height: calc(100vh - 340px);
+  max-height: calc(100vh - 190px);
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(205, 165, 255, 0.24);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+}
+
+.docflow-page-full .docflow-sidepanel {
+  max-height: calc(100vh - 190px);
+  top: 10px;
+  overflow: auto;
+}
+
+.docflow-page-full .docflow-toolbar,
+.docflow-page-full .docflow-template-meta,
+.docflow-page-full .docflow-tools,
+.docflow-page-full .docflow-quick-tools {
+  border: 1px solid rgba(205, 165, 255, 0.2);
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.docflow-page-full .docflow-stylebar {
+  margin-top: 2px;
+}
+
+@media (max-width: 1320px) {
+  .docflow-page-full .docflow-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .docflow-page-full .docflow-builder-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .docflow-page-full {
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .docflow-page-full .docflow-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .docflow-page-full .docflow-sidebar,
+  .docflow-page-full .docflow-sidepanel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .docflow-page-full .docflow-builder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .docflow-page-full .docflow-canvas-wrap {
+    max-height: none;
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
