@@ -4206,6 +4206,57 @@ app.get('/api/me', (req, res) => {
   });
 });
 
+app.get('/api/health/auth', (req, res) => {
+  const sessionUser = req.session?.user || null;
+  const cookies = parseCookieHeader(req.headers?.cookie || '');
+  const authCookiePresent = Boolean(cookies[AUTH_COOKIE_NAME]);
+  const cookieUser = verifySignedAuthCookieValue(cookies[AUTH_COOKIE_NAME] || '') || null;
+  const resolvedUser = resolveAuthenticatedUser(req);
+
+  let redirectHost = '';
+  let redirectPath = '';
+  let redirectProtocol = '';
+  try {
+    if (DISCORD_REDIRECT_URI) {
+      const parsed = new URL(DISCORD_REDIRECT_URI);
+      redirectHost = parsed.host;
+      redirectPath = parsed.pathname;
+      redirectProtocol = parsed.protocol.replace(':', '');
+    }
+  } catch (error) {
+    redirectHost = '';
+    redirectPath = '';
+    redirectProtocol = '';
+  }
+
+  return res.json({
+    ok: true,
+    now: new Date().toISOString(),
+    oauth: {
+      clientIdConfigured: Boolean(DISCORD_CLIENT_ID),
+      clientSecretConfigured: Boolean(DISCORD_CLIENT_SECRET),
+      redirectUriConfigured: Boolean(DISCORD_REDIRECT_URI),
+      redirectHost,
+      redirectPath,
+      redirectProtocol,
+    },
+    session: {
+      hasSessionUser: Boolean(sessionUser?.id),
+      hasSettings: Boolean(req.session?.settings),
+      sessionUserIdPresent: Boolean(sessionUser?.id),
+    },
+    cookie: {
+      authCookiePresent,
+      authCookieValid: Boolean(cookieUser?.id),
+      cookieUserIdPresent: Boolean(cookieUser?.id),
+    },
+    effective: {
+      authenticated: Boolean(resolvedUser?.id),
+      userIdPresent: Boolean(resolvedUser?.id),
+    },
+  });
+});
+
 app.get('/api/bot-builder/projects', requireAuth, (req, res) => {
   const userId = sanitizeText(req.session.user.id, 80);
   const projects = getBotProjectsForUser(userId);
