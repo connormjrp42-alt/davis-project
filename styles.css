@@ -2990,6 +2990,14 @@ h1 span {
     linear-gradient(170deg, rgba(40, 16, 66, 0.86), rgba(19, 8, 33, 0.9));
 }
 
+#docflowWorkspace[hidden] {
+  display: none !important;
+}
+
+#docflowRouteGateway[hidden] {
+  display: none !important;
+}
+
 .docflow-route-gateway h2 {
   margin: 0 0 8px;
 }
