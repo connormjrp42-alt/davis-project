@@ -46,14 +46,6 @@
         <section class="card docflow-work">
           <div class="docflow-headline">
             <h2 id="docflowTemplateTitle">Выберите шаблон</h2>
-            <div class="docflow-actions">
-              <button id="docflowModeBtn" class="cta cta-ghost" type="button" hidden>Режим: редактирование</button>
-              <button id="docflowSaveFillBtn" class="cta cta-ghost" type="button" hidden>Сохранить заполнение</button>
-              <button id="docflowPngBtn" class="cta cta-ghost" type="button" hidden>PNG</button>
-              <button id="docflowPdfBtn" class="cta cta-ghost" type="button" hidden>PDF</button>
-              <button id="docflowSaveTemplateBtn" class="cta cta-primary" type="button" hidden>Сохранить шаблон</button>
-              <button id="docflowDeleteTemplateBtn" class="cta cta-ghost" type="button" hidden>Удалить шаблон</button>
-            </div>
           </div>
 
           <div id="docflowEditor" class="docflow-editor" hidden>
@@ -63,6 +55,18 @@
               </div>
 
               <aside class="docflow-sidepanel">
+                <section class="docflow-side-actions">
+                  <h3>Быстрые действия</h3>
+                  <div class="docflow-actions">
+                    <button id="docflowModeBtn" class="cta cta-ghost" type="button" hidden>Режим: редактирование</button>
+                    <button id="docflowSaveFillBtn" class="cta cta-ghost" type="button" hidden>Сохранить заполнение</button>
+                    <button id="docflowPngBtn" class="cta cta-ghost" type="button" hidden>PNG</button>
+                    <button id="docflowPdfBtn" class="cta cta-ghost" type="button" hidden>PDF</button>
+                    <button id="docflowSaveTemplateBtn" class="cta cta-primary" type="button" hidden>Сохранить шаблон</button>
+                    <button id="docflowDeleteTemplateBtn" class="cta cta-ghost" type="button" hidden>Удалить шаблон</button>
+                  </div>
+                </section>
+
                 <section class="docflow-toolbar card">
                   <div class="docflow-toolbar-left">
                     <strong>Панель документа</strong>
@@ -113,6 +117,14 @@
                 <section class="docflow-quick-tools">
                   <label>Масштаб <input id="docflowZoom" type="range" min="20" max="120" step="5" value="100" /></label>
                   <label class="docflow-checkbox"><input id="docflowSnap" type="checkbox" checked /> Привязка к сетке</label>
+                </section>
+
+                <section class="docflow-hotkeys">
+                  <h3>Горячие клавиши</h3>
+                  <p><kbd>Ctrl/Cmd + S</kbd> сохранить</p>
+                  <p><kbd>Ctrl/Cmd + Z</kbd> отменить</p>
+                  <p><kbd>Ctrl/Cmd + Shift + Z</kbd> повторить</p>
+                  <p><kbd>Delete</kbd> удалить выбранный элемент</p>
                 </section>
 
                 <section class="docflow-layers">

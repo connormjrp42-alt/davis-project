@@ -2786,9 +2786,10 @@ h1 span {
 
 .docflow-headline {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 8px;
   flex-wrap: wrap;
+  padding: 2px 4px;
 }
 
 .docflow-headline h2 {
@@ -2902,10 +2903,51 @@ h1 span {
 }
 
 .docflow-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
+}
+
+.docflow-side-actions {
+  border: 1px solid rgba(205, 165, 255, 0.2);
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.docflow-side-actions h3,
+.docflow-hotkeys h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.docflow-hotkeys {
+  border: 1px solid rgba(205, 165, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.docflow-hotkeys p {
+  margin: 0;
+  color: #d8c9f2;
+  font-size: 0.86rem;
+}
+
+.docflow-hotkeys kbd {
+  display: inline-block;
+  min-width: 78px;
+  padding: 3px 7px;
+  border-radius: 7px;
+  border: 1px solid rgba(208, 170, 255, 0.34);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: #fff;
 }
 
 .docflow-editor {
@@ -3455,6 +3497,10 @@ h1 span {
 
   .docflow-page-full .docflow-builder-grid {
     grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .docflow-actions {
+    grid-template-columns: 1fr;
   }
 }
 
