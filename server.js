@@ -174,6 +174,13 @@ function sanitizeText(value, max = 1000) {
     .slice(0, max);
 }
 
+function normalizeDiscordBotToken(value) {
+  const raw = sanitizeText(value, 4000);
+  if (!raw) return '';
+  // Users often paste "Bot <token>" from docs; keep only the token part.
+  return raw.replace(/^Bot\s+/i, '').trim();
+}
+
 function parseCookieHeader(headerValue) {
   const map = {};
   const raw = typeof headerValue === 'string' ? headerValue : '';
@@ -1066,7 +1073,8 @@ function setBotProjectStoredToken(userIdInput, projectIdInput, botTokenInput) {
   const userId = sanitizeText(userIdInput, 80);
   const projectId = sanitizeText(projectIdInput, 80);
   if (!/^\d{5,30}$/.test(userId) || !projectId) return false;
-  const encrypted = encryptBotProjectToken(botTokenInput);
+  const normalizedToken = normalizeDiscordBotToken(botTokenInput);
+  const encrypted = encryptBotProjectToken(normalizedToken);
   if (!encrypted) return false;
   if (!botProjectSecretsStore[userId] || typeof botProjectSecretsStore[userId] !== 'object') {
     botProjectSecretsStore[userId] = {};
@@ -1092,7 +1100,7 @@ function removeBotProjectStoredToken(userIdInput, projectIdInput) {
 }
 
 async function fetchDiscordBotApi(botTokenInput, url, options = {}) {
-  const botToken = sanitizeText(botTokenInput, 2000);
+  const botToken = normalizeDiscordBotToken(botTokenInput);
   if (!botToken) {
     return { ok: false, status: 401, data: null, raw: '', message: 'Требуется BOT_TOKEN.' };
   }
@@ -4362,7 +4370,7 @@ app.post('/api/bot-builder/projects', requireAuth, (req, res) => {
   botProjectsStore[userId] = projects.slice(0, 120);
   saveBotProjectsStore();
 
-  const draftToken = sanitizeText(req.body?.botToken, 2000);
+  const draftToken = normalizeDiscordBotToken(req.body?.botToken);
   if (draftToken && !setBotProjectStoredToken(userId, project.id, draftToken)) {
     return res.status(500).json({
       error: 'token_store_failed',
@@ -4411,7 +4419,7 @@ app.put('/api/bot-builder/projects/:id', requireAuth, (req, res) => {
   botProjectsStore[userId] = projects.slice(0, 120);
   saveBotProjectsStore();
 
-  const draftToken = sanitizeText(req.body?.botToken, 2000);
+  const draftToken = normalizeDiscordBotToken(req.body?.botToken);
   if (draftToken && !setBotProjectStoredToken(userId, merged.id, draftToken)) {
     return res.status(500).json({
       error: 'token_store_failed',
@@ -4437,7 +4445,7 @@ app.post('/api/bot-builder/projects/:id/cloud/connect', requireAuth, async (req,
     return res.status(404).json({ error: 'not_found', message: 'Бот не найден.' });
   }
 
-  const tokenFromBody = sanitizeText(req.body?.botToken, 2000);
+  const tokenFromBody = normalizeDiscordBotToken(req.body?.botToken);
   const storedToken = getBotProjectStoredToken(userId, projectId);
   const botToken = tokenFromBody || storedToken;
   if (!botToken) {
@@ -5212,7 +5220,7 @@ app.post('/api/bot-builder/projects/:id/publish-contracts-embed', requireAuth, a
     return res.status(404).json({ error: 'not_found', message: 'Бот не найден.' });
   }
 
-  const tokenFromBody = sanitizeText(req.body?.botToken, 2000);
+  const tokenFromBody = normalizeDiscordBotToken(req.body?.botToken);
   const botToken = tokenFromBody || getBotProjectStoredToken(userId, project.id);
   if (!botToken) {
     return res.status(400).json({
@@ -5355,7 +5363,7 @@ app.post('/api/bot-builder/projects/:id/publish-embed', requireAuth, async (req,
     return res.status(404).json({ error: 'not_found', message: 'Бот не найден.' });
   }
 
-  const tokenFromBody = sanitizeText(req.body?.botToken, 2000);
+  const tokenFromBody = normalizeDiscordBotToken(req.body?.botToken);
   const botToken = tokenFromBody || getBotProjectStoredToken(userId, project.id);
   if (!botToken) {
     return res.status(400).json({
@@ -7128,4 +7136,5 @@ startBotGatewaySyncLoop();
 app.listen(port, () => {
   console.log(`Davis Project server started on http://localhost:${port}`);
 });
+
 
