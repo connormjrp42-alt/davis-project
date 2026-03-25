@@ -439,9 +439,19 @@
       const row = document.createElement('div');
       row.className = 'docflow-route-item';
 
+      const head = document.createElement('div');
+      head.className = 'docflow-route-head';
+      const title = document.createElement('strong');
+      title.className = 'docflow-route-server';
+      title.textContent = server;
+      const meta = document.createElement('span');
+      meta.className = 'docflow-route-meta';
+      meta.textContent = `Организации: ${ORGANIZATIONS.length}`;
+      head.append(title, meta);
+
       const path = document.createElement('div');
       path.className = 'docflow-route-path';
-      path.innerHTML = `<strong>${server}</strong> <span>→</span> <em>Организация</em> <span>→</span> <strong>Документооборот</strong>`;
+      path.innerHTML = `<em>Организация</em> <span>→</span> <strong>Документооборот</strong>`;
 
       const controls = document.createElement('div');
       controls.className = 'docflow-route-controls';
@@ -449,13 +459,14 @@
         const openBtn = document.createElement('button');
         openBtn.type = 'button';
         openBtn.className = 'cta cta-ghost docflow-org-btn';
-        openBtn.textContent = `${org} → Документооборот`;
+        openBtn.textContent = org;
+        openBtn.title = `${server} → ${org} → Документооборот`;
         openBtn.addEventListener('click', () => {
           openWorkspaceForRoute(server, org);
         });
         controls.append(openBtn);
       });
-      row.append(path, controls);
+      row.append(head, path, controls);
       el.routeList.append(row);
     });
   }

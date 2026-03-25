@@ -2981,10 +2981,13 @@ h1 span {
 }
 
 .docflow-route-gateway {
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(202, 162, 255, 0.3);
-  background: linear-gradient(170deg, rgba(40, 16, 66, 0.8), rgba(19, 8, 33, 0.84));
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(202, 162, 255, 0.34);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(145, 89, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 84% 88%, rgba(95, 188, 255, 0.1), transparent 44%),
+    linear-gradient(170deg, rgba(40, 16, 66, 0.86), rgba(19, 8, 33, 0.9));
 }
 
 .docflow-route-gateway h2 {
@@ -2993,19 +2996,47 @@ h1 span {
 
 .docflow-route-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   max-height: calc(100vh - 210px);
   overflow: auto;
-  padding-right: 2px;
+  padding-right: 4px;
 }
 
 .docflow-route-item {
-  border: 1px solid rgba(205, 166, 255, 0.24);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 10px;
+  border: 1px solid rgba(205, 166, 255, 0.28);
+  border-radius: 14px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  padding: 11px;
   display: grid;
   gap: 8px;
+  transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.docflow-route-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(222, 182, 255, 0.55);
+  background: linear-gradient(165deg, rgba(174, 108, 255, 0.18), rgba(255, 255, 255, 0.05));
+}
+
+.docflow-route-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.docflow-route-server {
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.docflow-route-meta {
+  font-size: 0.78rem;
+  color: #ccb9e8;
+  border: 1px solid rgba(199, 163, 255, 0.28);
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .docflow-route-path {
@@ -3028,14 +3059,21 @@ h1 span {
 
 .docflow-route-controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
 .docflow-org-btn {
-  min-height: 36px;
-  padding: 8px 10px;
+  min-height: 34px;
+  padding: 7px 9px;
   font-size: 0.84rem;
+  justify-content: flex-start;
+  border-color: rgba(204, 166, 255, 0.3);
+}
+
+.docflow-org-btn:hover {
+  border-color: rgba(223, 187, 255, 0.64);
+  background: linear-gradient(135deg, rgba(167, 94, 255, 0.24), rgba(104, 40, 213, 0.2));
 }
 
 .docflow-variant-b .docflow-actions {
@@ -3141,6 +3179,12 @@ h1 span {
     background: transparent;
   }
 
+  .docflow-route-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
   .docflow-route-controls {
     grid-template-columns: 1fr;
   }
