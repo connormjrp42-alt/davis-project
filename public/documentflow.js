@@ -37,6 +37,7 @@
   const el = {
     status: $('#docflowStatus'),
     serverFilter: $('#docflowServerFilter'),
+    templateSearch: $('#docflowTemplateSearch'),
     templateList: $('#docflowTemplateList'),
     createBtn: $('#docflowCreateBtn'),
     title: $('#docflowTemplateTitle'),
@@ -80,6 +81,7 @@
     styleAlignLeft: $('#docflowStyleAlignLeft'),
     styleAlignCenter: $('#docflowStyleAlignCenter'),
     styleAlignRight: $('#docflowStyleAlignRight'),
+    focusBtn: $('#docflowFocusBtn'),
   };
 
   const prop = {
@@ -405,7 +407,12 @@
   function renderTemplateList() {
     if (!el.templateList) return;
     const filterServer = el.serverFilter?.value || '';
-    const list = state.templates.filter((t) => !filterServer || t.server === filterServer);
+    const filterText = String(el.templateSearch?.value || '').trim().toLowerCase();
+    const list = state.templates.filter((t) => {
+      if (filterServer && t.server !== filterServer) return false;
+      if (!filterText) return true;
+      return String(t.title || '').toLowerCase().includes(filterText);
+    });
     el.templateList.innerHTML = '';
     if (!list.length) {
       const p = document.createElement('p');
@@ -1256,7 +1263,18 @@
 
   function bind() {
     if (el.serverFilter) el.serverFilter.addEventListener('change', renderTemplateList);
+    if (el.templateSearch) el.templateSearch.addEventListener('input', renderTemplateList);
     if (el.createBtn) el.createBtn.addEventListener('click', createDraft);
+    if (el.focusBtn) {
+      el.focusBtn.addEventListener('click', () => {
+        const layout = document.querySelector('.docflow-layout');
+        if (!layout) return;
+        const isFocus = layout.classList.toggle('docflow-focus-mode');
+        el.focusBtn.textContent = isFocus ? 'Обычный вид' : 'Фокус';
+        state.forceFitPage = true;
+        fitCanvasToViewport();
+      });
+    }
     if (el.modeBtn) el.modeBtn.addEventListener('click', () => {
       if (!canManage() || !state.template) return;
       state.mode = state.mode === 'edit' ? 'fill' : 'edit';

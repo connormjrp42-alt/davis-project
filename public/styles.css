@@ -2741,6 +2741,15 @@ h1 span {
   padding: 8px 10px;
 }
 
+.docflow-sidebar input[type='search'] {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  padding: 8px 10px;
+}
+
 .docflow-template-list {
   display: grid;
   gap: 8px;
@@ -2960,6 +2969,10 @@ h1 span {
   background: rgba(255, 255, 255, 0.035);
   border-radius: 12px;
   padding: 8px 10px;
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  backdrop-filter: blur(8px);
 }
 
 .docflow-work-topbar h2 {
@@ -2982,6 +2995,18 @@ h1 span {
 .docflow-variant-b .docflow-layout {
   grid-template-columns: 240px minmax(0, 1fr);
   gap: 14px;
+}
+
+.docflow-variant-b .docflow-layout.docflow-focus-mode {
+  grid-template-columns: 1fr;
+}
+
+.docflow-variant-b .docflow-layout.docflow-focus-mode .docflow-sidebar {
+  display: none;
+}
+
+.docflow-variant-b .docflow-layout.docflow-focus-mode .docflow-builder-grid {
+  grid-template-columns: minmax(0, 1fr) 320px;
 }
 
 .docflow-variant-b .docflow-sidebar {

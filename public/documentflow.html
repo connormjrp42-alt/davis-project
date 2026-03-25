@@ -39,6 +39,7 @@
         <aside class="card docflow-sidebar">
           <h3 class="docflow-panel-title">Библиотека шаблонов</h3>
           <label>Сервер<select id="docflowServerFilter"></select></label>
+          <label>Поиск шаблона<input id="docflowTemplateSearch" type="search" placeholder="Введите название..." maxlength="120" /></label>
           <div id="docflowTemplateList" class="docflow-template-list"></div>
           <button id="docflowCreateBtn" class="cta cta-primary" type="button" hidden>Создать шаблон</button>
         </aside>
@@ -47,6 +48,7 @@
           <div class="docflow-work-topbar">
             <h2 id="docflowTemplateTitle">Выберите шаблон</h2>
             <div class="docflow-actions">
+              <button id="docflowFocusBtn" class="cta cta-ghost" type="button">Фокус</button>
               <button id="docflowModeBtn" class="cta cta-ghost" type="button" hidden>Режим: редактирование</button>
               <button id="docflowSaveFillBtn" class="cta cta-ghost" type="button" hidden>Сохранить заполнение</button>
               <button id="docflowPngBtn" class="cta cta-ghost" type="button" hidden>PNG</button>
