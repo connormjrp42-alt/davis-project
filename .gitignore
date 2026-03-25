@@ -1,2 +1,10 @@
 ﻿node_modules/
 .env
+*.log
+tmp-*.log
+server.log
+server.err.log
+server.out.log
+start-test.txt
+nodever.txt
+nodevererr.txt
