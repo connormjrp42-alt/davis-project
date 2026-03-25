@@ -435,30 +435,29 @@
   function renderRouteGateway() {
     if (!el.routeList) return;
     el.routeList.innerHTML = '';
-    SERVERS.forEach((server) => {
+    SERVERS.forEach((server, idx) => {
       const row = document.createElement('div');
       row.className = 'docflow-route-item';
 
-      const head = document.createElement('div');
-      head.className = 'docflow-route-head';
+      const left = document.createElement('div');
+      left.className = 'docflow-route-left';
+      const index = document.createElement('span');
+      index.className = 'docflow-route-index';
+      index.textContent = String(idx + 1).padStart(2, '0');
       const title = document.createElement('strong');
       title.className = 'docflow-route-server';
       title.textContent = server;
       const meta = document.createElement('span');
       meta.className = 'docflow-route-meta';
-      meta.textContent = `Организации: ${ORGANIZATIONS.length}`;
-      head.append(title, meta);
-
-      const path = document.createElement('div');
-      path.className = 'docflow-route-path';
-      path.innerHTML = `<em>Организация</em> <span>→</span> <strong>Документооборот</strong>`;
+      meta.textContent = 'Документооборот';
+      left.append(index, title, meta);
 
       const controls = document.createElement('div');
       controls.className = 'docflow-route-controls';
       ORGANIZATIONS.forEach((org) => {
         const openBtn = document.createElement('button');
         openBtn.type = 'button';
-        openBtn.className = 'cta cta-ghost docflow-org-btn';
+        openBtn.className = 'docflow-org-btn';
         openBtn.textContent = org;
         openBtn.title = `${server} → ${org} → Документооборот`;
         openBtn.addEventListener('click', () => {
@@ -466,7 +465,7 @@
         });
         controls.append(openBtn);
       });
-      row.append(head, path, controls);
+      row.append(left, controls);
       el.routeList.append(row);
     });
   }
