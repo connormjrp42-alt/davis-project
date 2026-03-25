@@ -2377,6 +2377,17 @@ async function notifyBotFamilyApplicantDm({ botToken, applicantDiscordId, embeds
   return { ok: true };
 }
 
+function resolveApplicantDiscordId(row) {
+  const entry = row && typeof row === 'object' ? row : {};
+  const candidates = [
+    sanitizeText(entry.applicantDiscordId, 40),
+    sanitizeText(entry.discordUserId, 40),
+    sanitizeText(entry.sourceSessionUserId, 40),
+  ];
+  const found = candidates.find((value) => /^\d{5,30}$/.test(value));
+  return found || '';
+}
+
 function buildBotContractApplicantDmEmbed({ nextStatus, contractName }) {
   const statusText = mapBotContractReportStatusToText(nextStatus);
   const colorMap = {
@@ -2481,10 +2492,11 @@ async function processBotContractReportAction(options = {}) {
   }
 
   let dmError = '';
-  if (updatedReport.applicantDiscordId) {
+  const applicantDiscordId = resolveApplicantDiscordId(updatedReport);
+  if (applicantDiscordId) {
     const dmSend = await notifyBotFamilyApplicantDm({
       botToken,
-      applicantDiscordId: updatedReport.applicantDiscordId,
+      applicantDiscordId,
       embeds: [
         buildBotContractApplicantDmEmbed({
           nextStatus,
@@ -2697,10 +2709,11 @@ async function processBotFamilyApplicationAction(options = {}) {
   }
 
   let dmError = '';
-  if (updatedApplication.applicantDiscordId) {
+  const applicantDiscordId = resolveApplicantDiscordId(updatedApplication);
+  if (applicantDiscordId) {
     const dmSend = await notifyBotFamilyApplicantDm({
       botToken,
-      applicantDiscordId: updatedApplication.applicantDiscordId,
+      applicantDiscordId,
       embeds: [
         buildBotFamilyApplicantDmEmbed({
           nextStatus,
@@ -4775,6 +4788,12 @@ app.post('/api/bot-builder/public/:id/apply', async (req, res) => {
   const applicantName = sanitizeText(req.body?.applicantName, 120) || applicantFallback || 'Не указан';
   const applicantDiscordIdRaw = sanitizeText(req.session?.user?.id, 40);
   const applicantDiscordId = /^\d{5,30}$/.test(applicantDiscordIdRaw) ? applicantDiscordIdRaw : '';
+  if (!applicantDiscordId) {
+    return res.status(401).json({
+      error: 'discord_auth_required',
+      message: 'Чтобы бот отправлял вам ЛС, войдите на сайт через Discord и отправьте заявку снова.',
+    });
+  }
 
   const rawAnswers = Array.isArray(req.body?.answers) ? req.body.answers : [];
   const answers = family.questions.map((question, index) => ({
@@ -5069,6 +5088,12 @@ app.post('/api/bot-builder/public/:id/contracts/report', async (req, res) => {
     : '';
   const applicantDiscordIdRaw = sanitizeText(req.session?.user?.id, 40);
   const applicantDiscordId = /^\d{5,30}$/.test(applicantDiscordIdRaw) ? applicantDiscordIdRaw : '';
+  if (!applicantDiscordId) {
+    return res.status(401).json({
+      error: 'discord_auth_required',
+      message: 'Чтобы получать уведомления в ЛС, войдите на сайт через Discord и отправьте отчет снова.',
+    });
+  }
   const applicantName = sanitizeText(req.body?.applicantName, 120) || applicantFallback || 'Не указан';
   const comment = sanitizeText(req.body?.comment, 1600);
 

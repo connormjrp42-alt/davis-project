@@ -2795,6 +2795,112 @@ h1 span {
   margin: 0;
 }
 
+.docflow-toolbar {
+  border: 1px solid rgba(206, 165, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.docflow-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.docflow-save-state {
+  border-radius: 999px;
+  padding: 4px 9px;
+  border: 1px solid rgba(184, 154, 233, 0.44);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d9c3ff;
+  font-size: 0.78rem;
+}
+
+.docflow-save-state.is-dirty {
+  color: #ffe6a5;
+  border-color: rgba(255, 225, 138, 0.45);
+  background: rgba(255, 203, 89, 0.12);
+}
+
+.docflow-save-state.is-saving {
+  color: #9fd6ff;
+  border-color: rgba(159, 214, 255, 0.5);
+  background: rgba(92, 151, 255, 0.12);
+}
+
+.docflow-save-state.is-error {
+  color: #ffc1d4;
+  border-color: rgba(255, 162, 186, 0.5);
+  background: rgba(212, 62, 113, 0.15);
+}
+
+.docflow-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.docflow-stylebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid rgba(209, 168, 255, 0.2);
+}
+
+.docflow-stylebar select,
+.docflow-stylebar input[type='number'],
+.docflow-stylebar input[type='color'] {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  padding: 7px 10px;
+  min-height: 36px;
+}
+
+.docflow-stylebar input[type='number'] {
+  width: 84px;
+}
+
+.docflow-stylebar input[type='color'] {
+  width: 44px;
+  padding: 4px;
+}
+
+.docflow-style-btn {
+  border: 1px solid rgba(207, 164, 255, 0.34);
+  border-radius: 10px;
+  min-width: 38px;
+  min-height: 36px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5ebff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.docflow-style-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(190, 130, 255, 0.2);
+  border-color: rgba(220, 181, 255, 0.6);
+}
+
+.docflow-style-btn.active {
+  background: linear-gradient(135deg, rgba(165, 83, 255, 0.42), rgba(114, 36, 221, 0.3));
+  border-color: rgba(222, 184, 255, 0.84);
+}
+
 .docflow-actions {
   display: flex;
   gap: 8px;

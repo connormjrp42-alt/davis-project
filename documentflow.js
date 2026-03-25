@@ -21,10 +21,17 @@
     undo: [],
     redo: [],
     forceFitPage: true,
+    templateDirty: false,
+    autosaveTimer: null,
   };
   const DOC_WIDTH = 794;
   const DOC_HEIGHT = 1123;
   const ALLOWED_TYPES = new Set(['text', 'heading', 'image', 'date', 'signature', 'line']);
+  const STYLE_FONT_FAMILIES = [
+    "'Times New Roman', Times, serif",
+    "'Manrope', sans-serif",
+    "'Unbounded', sans-serif",
+  ];
 
   const el = {
     status: $('#docflowStatus'),
@@ -61,6 +68,17 @@
     propDelete: $('#propDelete'),
     propSignatureWrap: $('#propSignatureWrap'),
     propSignatureValue: $('#propSignatureValue'),
+    saveState: $('#docflowSaveState'),
+    styleBar: $('#docflowStyleBar'),
+    styleFontFamily: $('#docflowStyleFontFamily'),
+    styleFontSize: $('#docflowStyleFontSize'),
+    styleColor: $('#docflowStyleColor'),
+    styleBold: $('#docflowStyleBold'),
+    styleItalic: $('#docflowStyleItalic'),
+    styleUnderline: $('#docflowStyleUnderline'),
+    styleAlignLeft: $('#docflowStyleAlignLeft'),
+    styleAlignCenter: $('#docflowStyleAlignCenter'),
+    styleAlignRight: $('#docflowStyleAlignRight'),
   };
 
   const prop = {
@@ -97,6 +115,14 @@
     if (!el.status) return;
     el.status.textContent = text || '';
     el.status.style.color = isError ? '#ff9dc5' : '#d8c2ff';
+  }
+  function setSaveState(text, tone = 'idle') {
+    if (!el.saveState) return;
+    el.saveState.textContent = text || '';
+    el.saveState.classList.remove('is-dirty', 'is-saving', 'is-error');
+    if (tone === 'dirty') el.saveState.classList.add('is-dirty');
+    if (tone === 'saving') el.saveState.classList.add('is-saving');
+    if (tone === 'error') el.saveState.classList.add('is-error');
   }
   function clamp(v, min, max, fallback) {
     const n = Number(v);
@@ -235,6 +261,9 @@
       style: {
         fontSize: clamp(s.fontSize, 10, 64, 16),
         color: String(s.color || '#21183f'),
+        fontFamily: STYLE_FONT_FAMILIES.includes(String(s.fontFamily || '')) ? String(s.fontFamily) : STYLE_FONT_FAMILIES[0],
+        fontStyle: ['normal', 'italic'].includes(String(s.fontStyle || '')) ? String(s.fontStyle) : 'normal',
+        textDecoration: ['none', 'underline'].includes(String(s.textDecoration || '')) ? String(s.textDecoration) : 'none',
         backgroundColor: String(s.backgroundColor || '#ffffff'),
         borderColor: String(s.borderColor || '#00000000'),
         borderWidth: clamp(s.borderWidth, 0, 20, 0),
@@ -320,6 +349,31 @@
     if (el.undoBtn) el.undoBtn.disabled = !state.undo.length;
     if (el.redoBtn) el.redoBtn.disabled = !state.redo.length;
   }
+  function clearAutosaveTimer() {
+    if (state.autosaveTimer) {
+      clearTimeout(state.autosaveTimer);
+      state.autosaveTimer = null;
+    }
+  }
+  function queueTemplateAutosave() {
+    if (!editing() || !state.template?.id) return;
+    clearAutosaveTimer();
+    setSaveState('Сохранение...', 'saving');
+    state.autosaveTimer = setTimeout(async () => {
+      state.autosaveTimer = null;
+      await saveTemplate({ silentStatus: true, autosave: true });
+    }, 900);
+  }
+  function markTemplateDirty() {
+    if (!editing()) return;
+    state.templateDirty = true;
+    if (state.template?.id) {
+      setSaveState('Есть несохранённые изменения', 'dirty');
+      queueTemplateAutosave();
+    } else {
+      setSaveState('Черновик: сохраните шаблон', 'dirty');
+    }
+  }
 
   function updateVisibility() {
     const hasTemplate = Boolean(state.template);
@@ -382,6 +436,9 @@
     node.style.zIndex = String(item.zIndex || 1);
     node.style.fontSize = `${s.fontSize || 16}px`;
     node.style.color = s.color || '#21183f';
+    node.style.fontFamily = s.fontFamily || STYLE_FONT_FAMILIES[0];
+    node.style.fontStyle = s.fontStyle || 'normal';
+    node.style.textDecoration = s.textDecoration || 'none';
     node.style.textAlign = s.align || 'left';
     node.style.fontWeight = s.fontWeight || 'normal';
     node.style.opacity = String(s.opacity || 1);
@@ -526,6 +583,7 @@
     reader.onload = () => {
       pushUndo();
       item.src = String(reader.result || '');
+      markTemplateDirty();
       renderAll();
       status('Изображение добавлено.', false);
     };
@@ -630,6 +688,7 @@
           head.placeholder = 'Заголовок документа';
           head.addEventListener('input', () => {
             item.text = head.value;
+            markTemplateDirty();
           });
         } else {
           head.textContent = item.text || '';
@@ -643,6 +702,7 @@
           txt.placeholder = item.placeholder || 'Введите текст';
           txt.addEventListener('input', () => {
             item.text = txt.value;
+            markTemplateDirty();
           });
         } else {
           txt.value = String(state.fillValues[item.id] || item.text || '');
@@ -713,6 +773,7 @@
         if (!editing()) return;
         pushUndo();
         item.locked = !item.locked;
+        markTemplateDirty();
         renderAll();
       });
       const vis = document.createElement('button');
@@ -723,11 +784,59 @@
         if (!editing()) return;
         pushUndo();
         item.hidden = !item.hidden;
+        markTemplateDirty();
         renderAll();
       });
       row.append(name, lock, vis);
       el.layers.append(row);
     });
+  }
+  function canUseTextStylePanel(item) {
+    if (!item) return false;
+    return ['text', 'heading', 'date', 'signature'].includes(item.type);
+  }
+  function setStyleBtnActive(node, active) {
+    if (!node) return;
+    node.classList.toggle('active', Boolean(active));
+  }
+  function syncStyleToolbar() {
+    const item = selectedElement();
+    const active = editing() && canUseTextStylePanel(item);
+    if (el.styleBar) el.styleBar.style.display = active ? 'flex' : 'none';
+    const disabledNodes = [
+      el.styleFontFamily,
+      el.styleFontSize,
+      el.styleColor,
+      el.styleBold,
+      el.styleItalic,
+      el.styleUnderline,
+      el.styleAlignLeft,
+      el.styleAlignCenter,
+      el.styleAlignRight,
+    ];
+    disabledNodes.forEach((node) => {
+      if (!node) return;
+      node.disabled = !active;
+    });
+    if (!active || !item) return;
+    const s = item.style || {};
+    if (el.styleFontFamily) el.styleFontFamily.value = s.fontFamily || STYLE_FONT_FAMILIES[0];
+    if (el.styleFontSize) el.styleFontSize.value = String(s.fontSize || 16);
+    if (el.styleColor) el.styleColor.value = s.color || '#21183f';
+    setStyleBtnActive(el.styleBold, String(s.fontWeight || 'normal') !== 'normal');
+    setStyleBtnActive(el.styleItalic, (s.fontStyle || 'normal') === 'italic');
+    setStyleBtnActive(el.styleUnderline, (s.textDecoration || 'none') === 'underline');
+    setStyleBtnActive(el.styleAlignLeft, (s.align || 'left') === 'left');
+    setStyleBtnActive(el.styleAlignCenter, (s.align || 'left') === 'center');
+    setStyleBtnActive(el.styleAlignRight, (s.align || 'left') === 'right');
+  }
+  function applyTextStyleChange(mutator) {
+    const item = selectedElement();
+    if (!editing() || !canUseTextStylePanel(item)) return;
+    pushUndo();
+    mutator(item.style || (item.style = {}), item);
+    markTemplateDirty();
+    renderAll();
   }
 
   function syncMetaFields() {
@@ -784,6 +893,7 @@
     item.style.fontWeight = prop.weight.value || 'normal';
     item.style.align = prop.align.value || 'left';
     if (item.type === 'line') item.h = 1;
+    markTemplateDirty();
     renderAll();
   }
 
@@ -796,6 +906,7 @@
     renderLayers();
     syncMetaFields();
     syncPropertyFields();
+    syncStyleToolbar();
     updateVisibility();
   }
 
@@ -917,6 +1028,7 @@
   }
 
   function stopDrag() {
+    if (state.drag && editing()) markTemplateDirty();
     state.drag = null;
     window.removeEventListener('mousemove', onDragMove);
     window.removeEventListener('mouseup', stopDrag);
@@ -979,6 +1091,9 @@
       state.mode = canManage() ? 'edit' : 'fill';
       state.undo = [];
       state.redo = [];
+      state.templateDirty = false;
+      clearAutosaveTimer();
+      setSaveState('Сохранено', 'idle');
       if (el.editor) el.editor.hidden = false;
       if (el.title) el.title.textContent = state.template.title || 'Шаблон';
       renderAll();
@@ -1004,6 +1119,9 @@
     state.mode = 'edit';
     state.undo = [];
     state.redo = [];
+    state.templateDirty = true;
+    clearAutosaveTimer();
+    setSaveState('Черновик: сохраните шаблон', 'dirty');
     if (el.editor) el.editor.hidden = false;
     if (el.title) el.title.textContent = 'Новый шаблон';
     renderAll();
@@ -1011,14 +1129,17 @@
     status('Черновик создан.', false);
   }
 
-  async function saveTemplate() {
+  async function saveTemplate(options = {}) {
     if (!editing() || !state.template) return;
+    const silentStatus = Boolean(options.silentStatus);
+    const autosave = Boolean(options.autosave);
     const data = payload();
     if (!data.title || !data.server) {
       status('Укажите название и сервер.', true);
       return;
     }
     try {
+      if (autosave) setSaveState('Сохранение...', 'saving');
       if (state.template.id) {
         const res = await req(`${state.apiBase}/templates/${encodeURIComponent(state.template.id)}`, {
           method: 'PUT',
@@ -1029,7 +1150,7 @@
           ...res.template,
           elements: (res.template.elements || []).map((x, i) => normalizeElement(x, i)),
         };
-        status('Шаблон обновлен.', false);
+        if (!silentStatus) status('Шаблон обновлен.', false);
       } else {
         const res = await req(`${state.apiBase}/templates`, {
           method: 'POST',
@@ -1038,12 +1159,15 @@
         });
         await loadTemplates();
         await loadTemplate(res.template.id);
-        status('Шаблон создан.', false);
+        if (!silentStatus) status('Шаблон создан.', false);
         return;
       }
+      state.templateDirty = false;
+      setSaveState('Сохранено', 'idle');
       await loadTemplates();
       renderAll();
     } catch (error) {
+      setSaveState('Ошибка сохранения', 'error');
       status(`Ошибка сохранения: ${error.message}`, true);
     }
   }
@@ -1057,6 +1181,9 @@
       state.selectedTemplateId = '';
       state.selectedElementId = '';
       state.fillValues = {};
+      state.templateDirty = false;
+      clearAutosaveTimer();
+      setSaveState('Сохранено', 'idle');
       if (el.editor) el.editor.hidden = true;
       if (el.title) el.title.textContent = 'Выберите шаблон';
       await loadTemplates();
@@ -1123,6 +1250,9 @@
     if (el.modeBtn) el.modeBtn.addEventListener('click', () => {
       if (!canManage() || !state.template) return;
       state.mode = state.mode === 'edit' ? 'fill' : 'edit';
+      if (editing()) {
+        setSaveState(state.templateDirty ? 'Есть несохранённые изменения' : 'Сохранено', state.templateDirty ? 'dirty' : 'idle');
+      }
       renderAll();
     });
     if (el.tools) el.tools.addEventListener('click', (event) => {
@@ -1132,6 +1262,7 @@
       const item = newElement(t.dataset.add);
       state.template.elements.push(item);
       state.selectedElementId = item.id;
+      markTemplateDirty();
       renderAll();
       if (item.type === 'image') pickImageForElement(item);
     });
@@ -1147,15 +1278,16 @@
       }, state.template.elements.length);
       state.template.elements.push(copy);
       state.selectedElementId = copy.id;
+      markTemplateDirty();
       renderAll();
     });
     if (el.undoBtn) el.undoBtn.addEventListener('click', undo);
     if (el.redoBtn) el.redoBtn.addEventListener('click', redo);
-    if (el.alignLeftBtn) el.alignLeftBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = 10; renderAll(); });
-    if (el.alignCenterBtn) el.alignCenterBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = (794 - item.w) / 2; renderAll(); });
-    if (el.alignRightBtn) el.alignRightBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = 794 - item.w - 10; renderAll(); });
-    if (el.bringFrontBtn) el.bringFrontBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.zIndex += 1; renderAll(); });
-    if (el.sendBackBtn) el.sendBackBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.zIndex = Math.max(0, item.zIndex - 1); renderAll(); });
+    if (el.alignLeftBtn) el.alignLeftBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = 10; markTemplateDirty(); renderAll(); });
+    if (el.alignCenterBtn) el.alignCenterBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = (794 - item.w) / 2; markTemplateDirty(); renderAll(); });
+    if (el.alignRightBtn) el.alignRightBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.x = 794 - item.w - 10; markTemplateDirty(); renderAll(); });
+    if (el.bringFrontBtn) el.bringFrontBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.zIndex += 1; markTemplateDirty(); renderAll(); });
+    if (el.sendBackBtn) el.sendBackBtn.addEventListener('click', () => { const item = selectedElement(); if (!item || !editing()) return; pushUndo(); item.zIndex = Math.max(0, item.zIndex - 1); markTemplateDirty(); renderAll(); });
     if (el.zoomRange) el.zoomRange.addEventListener('input', () => {
       state.forceFitPage = false;
       state.zoom = clamp(el.zoomRange.value / 100, 0.2, 1.2, 1);
@@ -1169,6 +1301,7 @@
         state.template.title = el.metaTitle.value;
         state.template.server = el.metaServer.value;
         state.template.description = el.metaDescription.value;
+        markTemplateDirty();
         if (el.title) el.title.textContent = state.template.title || 'Шаблон';
       });
     });
@@ -1186,6 +1319,7 @@
       pushUndo();
       state.template.elements = state.template.elements.filter((x) => x.id !== state.selectedElementId);
       state.selectedElementId = '';
+      markTemplateDirty();
       renderAll();
     });
     if (el.saveTemplateBtn) el.saveTemplateBtn.addEventListener('click', saveTemplate);
@@ -1193,9 +1327,104 @@
     if (el.saveFillBtn) el.saveFillBtn.addEventListener('click', saveFill);
     if (el.pngBtn) el.pngBtn.addEventListener('click', () => exportDoc('png'));
     if (el.pdfBtn) el.pdfBtn.addEventListener('click', () => exportDoc('pdf'));
+    if (el.styleFontFamily) {
+      el.styleFontFamily.addEventListener('change', () => {
+        applyTextStyleChange((s) => {
+          s.fontFamily = STYLE_FONT_FAMILIES.includes(el.styleFontFamily.value)
+            ? el.styleFontFamily.value
+            : STYLE_FONT_FAMILIES[0];
+        });
+      });
+    }
+    if (el.styleFontSize) {
+      el.styleFontSize.addEventListener('change', () => {
+        applyTextStyleChange((s) => {
+          s.fontSize = clamp(el.styleFontSize.value, 10, 64, s.fontSize || 16);
+        });
+      });
+    }
+    if (el.styleColor) {
+      el.styleColor.addEventListener('change', () => {
+        applyTextStyleChange((s) => {
+          s.color = el.styleColor.value || '#21183f';
+        });
+      });
+    }
+    if (el.styleBold) {
+      el.styleBold.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.fontWeight = String(s.fontWeight || 'normal') === 'normal' ? '700' : 'normal';
+        });
+      });
+    }
+    if (el.styleItalic) {
+      el.styleItalic.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.fontStyle = (s.fontStyle || 'normal') === 'italic' ? 'normal' : 'italic';
+        });
+      });
+    }
+    if (el.styleUnderline) {
+      el.styleUnderline.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.textDecoration = (s.textDecoration || 'none') === 'underline' ? 'none' : 'underline';
+        });
+      });
+    }
+    if (el.styleAlignLeft) {
+      el.styleAlignLeft.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.align = 'left';
+        });
+      });
+    }
+    if (el.styleAlignCenter) {
+      el.styleAlignCenter.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.align = 'center';
+        });
+      });
+    }
+    if (el.styleAlignRight) {
+      el.styleAlignRight.addEventListener('click', () => {
+        applyTextStyleChange((s) => {
+          s.align = 'right';
+        });
+      });
+    }
     window.addEventListener('resize', () => {
       state.forceFitPage = true;
       fitCanvasToViewport();
+    });
+    window.addEventListener('keydown', (event) => {
+      const meta = event.ctrlKey || event.metaKey;
+      if (meta && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        if (editing()) {
+          void saveTemplate();
+        } else {
+          void saveFill();
+        }
+        return;
+      }
+      if (editing() && meta && event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redo(); else undo();
+        return;
+      }
+      if (editing() && meta && event.key.toLowerCase() === 'y') {
+        event.preventDefault();
+        redo();
+        return;
+      }
+      if (editing() && event.key === 'Delete' && state.selectedElementId && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) {
+        event.preventDefault();
+        pushUndo();
+        state.template.elements = state.template.elements.filter((x) => x.id !== state.selectedElementId);
+        state.selectedElementId = '';
+        markTemplateDirty();
+        renderAll();
+      }
     });
   }
 
