@@ -2981,7 +2981,7 @@ h1 span {
 }
 
 .docflow-route-gateway {
-  padding: 0;
+  padding: 8px 0 0;
   border-radius: 0;
   border: 0;
   background: transparent;
@@ -3002,18 +3002,17 @@ h1 span {
 
 .docflow-route-list {
   display: grid;
-  gap: 0;
-  max-height: calc(100vh - 150px);
-  overflow: auto;
-  padding-right: 2px;
+  gap: 8px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .docflow-route-item {
-  border: 0;
-  border-bottom: 1px solid rgba(210, 170, 255, 0.2);
-  border-radius: 0;
-  background: transparent;
-  padding: 6px 2px;
+  border: 1px solid rgba(206, 166, 255, 0.26);
+  border-radius: 12px;
+  background: linear-gradient(140deg, rgba(170, 104, 255, 0.16), rgba(255, 255, 255, 0.04));
+  padding: 8px 10px;
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   align-items: center;
@@ -3022,13 +3021,13 @@ h1 span {
 }
 
 .docflow-route-item:hover {
-  border-color: rgba(222, 182, 255, 0.4);
-  background: rgba(178, 111, 255, 0.08);
+  border-color: rgba(232, 196, 255, 0.62);
+  background: linear-gradient(140deg, rgba(179, 109, 255, 0.24), rgba(255, 255, 255, 0.06));
 }
 
 .docflow-route-accordion {
   grid-template-columns: 1fr;
-  padding: 0 2px;
+  padding: 0;
   overflow: hidden;
 }
 
