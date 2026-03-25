@@ -160,11 +160,19 @@ function parseCookieHeader(headerValue) {
 }
 
 function toBase64Url(input) {
-  return Buffer.from(input).toString('base64url');
+  return Buffer.from(input)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
 }
 
 function fromBase64Url(input) {
-  return Buffer.from(String(input || ''), 'base64url').toString('utf8');
+  const normalized = String(input || '')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const pad = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
+  return Buffer.from(normalized + pad, 'base64').toString('utf8');
 }
 
 function sanitizeSessionUser(user) {
