@@ -23,6 +23,7 @@
     forceFitPage: true,
     templateDirty: false,
     autosaveTimer: null,
+    templateEditVersion: 0,
   };
   const DOC_WIDTH = 794;
   const DOC_HEIGHT = 1123;
@@ -367,6 +368,7 @@
   function markTemplateDirty() {
     if (!editing()) return;
     state.templateDirty = true;
+    state.templateEditVersion += 1;
     if (state.template?.id) {
       setSaveState('Есть несохранённые изменения', 'dirty');
       queueTemplateAutosave();
@@ -1092,6 +1094,7 @@
       state.undo = [];
       state.redo = [];
       state.templateDirty = false;
+      state.templateEditVersion = 0;
       clearAutosaveTimer();
       setSaveState('Сохранено', 'idle');
       if (el.editor) el.editor.hidden = false;
@@ -1120,6 +1123,7 @@
     state.undo = [];
     state.redo = [];
     state.templateDirty = true;
+    state.templateEditVersion = 1;
     clearAutosaveTimer();
     setSaveState('Черновик: сохраните шаблон', 'dirty');
     if (el.editor) el.editor.hidden = false;
@@ -1134,6 +1138,7 @@
     const silentStatus = Boolean(options.silentStatus);
     const autosave = Boolean(options.autosave);
     const data = payload();
+    const saveVersion = state.templateEditVersion;
     if (!data.title || !data.server) {
       status('Укажите название и сервер.', true);
       return;
@@ -1141,15 +1146,19 @@
     try {
       if (autosave) setSaveState('Сохранение...', 'saving');
       if (state.template.id) {
-        const res = await req(`${state.apiBase}/templates/${encodeURIComponent(state.template.id)}`, {
+        await req(`${state.apiBase}/templates/${encodeURIComponent(state.template.id)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-        state.template = {
-          ...res.template,
-          elements: (res.template.elements || []).map((x, i) => normalizeElement(x, i)),
-        };
+        const hasNewerLocalChanges = saveVersion !== state.templateEditVersion;
+        if (!hasNewerLocalChanges) {
+          state.templateDirty = false;
+          setSaveState('Сохранено', 'idle');
+        } else {
+          state.templateDirty = true;
+          setSaveState('Есть несохранённые изменения', 'dirty');
+        }
         if (!silentStatus) status('Шаблон обновлен.', false);
       } else {
         const res = await req(`${state.apiBase}/templates`, {
@@ -1162,10 +1171,10 @@
         if (!silentStatus) status('Шаблон создан.', false);
         return;
       }
-      state.templateDirty = false;
-      setSaveState('Сохранено', 'idle');
-      await loadTemplates();
-      renderAll();
+      if (!autosave) {
+        await loadTemplates();
+        renderTemplateList();
+      }
     } catch (error) {
       setSaveState('Ошибка сохранения', 'error');
       status(`Ошибка сохранения: ${error.message}`, true);
@@ -1182,6 +1191,7 @@
       state.selectedElementId = '';
       state.fillValues = {};
       state.templateDirty = false;
+      state.templateEditVersion = 0;
       clearAutosaveTimer();
       setSaveState('Сохранено', 'idle');
       if (el.editor) el.editor.hidden = true;
