@@ -246,6 +246,7 @@
     const profileUrlRaw = String(options.profileUrl || '').trim();
     const profileUrl = /^https?:\/\//i.test(profileUrlRaw) ? profileUrlRaw : '';
     const avatarUrl = String(options.avatarUrl || '').trim();
+    const fallbackAvatarUrl = discordId ? getDiscordFallbackAvatar(discordId) : '';
     const compact = Boolean(options.compact);
 
     const root = document.createElement(profileUrl ? 'a' : 'div');
@@ -261,6 +262,7 @@
     const avatar = document.createElement('img');
     avatar.className = 'faction-discord-user-avatar';
     avatar.alt = displayName;
+    avatar.referrerPolicy = 'no-referrer';
 
     const fallback = document.createElement('div');
     fallback.className = 'faction-discord-user-avatar-fallback';
@@ -273,9 +275,16 @@
       </svg>
     `;
 
-    if (avatarUrl) {
-      avatar.src = avatarUrl;
+    const primaryAvatarUrl = avatarUrl || fallbackAvatarUrl;
+    if (primaryAvatarUrl) {
+      avatar.src = primaryAvatarUrl;
       avatar.onerror = () => {
+        const current = String(avatar.src || '');
+        // First retry with Discord default avatar by user ID.
+        if (fallbackAvatarUrl && !current.includes('/embed/avatars/')) {
+          avatar.src = fallbackAvatarUrl;
+          return;
+        }
         avatar.hidden = true;
         fallback.hidden = false;
       };
