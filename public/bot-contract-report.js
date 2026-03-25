@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const titleEl = document.getElementById('contractReportTitle');
   const subtitleEl = document.getElementById('contractReportSubtitle');
   const form = document.getElementById('contractReportForm');
@@ -36,6 +36,7 @@
   }
 
   let availableContracts = [];
+  let previewUrl = '';
 
   form.addEventListener('submit', onSubmit);
   screenshotInput.addEventListener('change', onScreenshotChange);
@@ -66,8 +67,7 @@
     }
 
     if (!response.ok) {
-      const message =
-        (payload && (payload.message || payload.error)) || `HTTP ${response.status}: запрос не выполнен`;
+      const message = (payload && (payload.message || payload.error)) || `HTTP ${response.status}: запрос не выполнен`;
       throw new Error(String(message));
     }
     return payload || {};
@@ -87,6 +87,10 @@
   function onScreenshotChange() {
     const file = screenshotInput.files && screenshotInput.files[0] ? screenshotInput.files[0] : null;
     if (!file) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = '';
+      }
       screenshotPreview.style.display = 'none';
       screenshotPreview.removeAttribute('src');
       return;
@@ -98,8 +102,12 @@
       setStatus('Скриншот слишком большой. Максимум 8MB.', true);
       return;
     }
-    const localUrl = URL.createObjectURL(file);
-    screenshotPreview.src = localUrl;
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    previewUrl = URL.createObjectURL(file);
+    screenshotPreview.src = previewUrl;
     screenshotPreview.style.display = 'block';
   }
 
@@ -178,6 +186,10 @@
       });
       setStatus('Отчет отправлен. Можете закрыть страницу.', false);
       form.reset();
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = '';
+      }
       screenshotPreview.style.display = 'none';
       screenshotPreview.removeAttribute('src');
       renderContractOptions(availableContracts);
