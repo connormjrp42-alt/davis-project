@@ -1972,15 +1972,15 @@ h1 span {
 .faction-discord-user-card {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   width: fit-content;
   max-width: 100%;
-  min-height: 58px;
-  border: 1px solid rgba(215, 182, 255, 0.34);
-  border-radius: 12px;
-  background: linear-gradient(145deg, rgba(28, 18, 46, 0.95), rgba(20, 14, 36, 0.95));
-  box-shadow: 0 10px 22px rgba(5, 2, 12, 0.3);
-  padding: 8px 10px;
+  min-height: 56px;
+  border: 1px solid rgba(188, 150, 255, 0.28);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(34, 23, 54, 0.98), rgba(22, 16, 39, 0.98));
+  box-shadow: 0 10px 24px rgba(6, 2, 16, 0.34);
+  padding: 8px 12px;
   text-decoration: none;
   color: inherit;
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -1994,16 +1994,16 @@ h1 span {
 
 .faction-discord-user-card.compact {
   width: 100%;
-  min-height: 52px;
+  min-height: 54px;
 }
 
 .faction-discord-user-avatar-wrap {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(53, 114, 227, 0.2);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -2017,9 +2017,17 @@ h1 span {
 }
 
 .faction-discord-user-avatar-fallback {
-  font-weight: 800;
-  color: #fff;
-  opacity: 0.95;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #dce7ff;
+  background: radial-gradient(circle at 30% 30%, rgba(57, 157, 255, 0.45), rgba(51, 80, 170, 0.65));
+}
+
+.faction-discord-user-avatar-fallback svg {
+  width: 21px;
+  height: 21px;
 }
 
 .faction-discord-user-body {
@@ -2031,15 +2039,15 @@ h1 span {
 .faction-discord-user-title {
   font-weight: 800;
   line-height: 1.1;
-  color: #f7eeff;
+  color: #f7f2ff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .faction-discord-user-subtitle {
-  font-size: 0.82rem;
-  color: #c9b0e9;
+  font-size: 0.79rem;
+  color: #bfb4d8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

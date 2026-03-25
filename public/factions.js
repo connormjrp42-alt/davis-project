@@ -264,7 +264,14 @@
 
     const fallback = document.createElement('div');
     fallback.className = 'faction-discord-user-avatar-fallback';
-    fallback.textContent = initials(displayName);
+    fallback.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M20.3 4.37A19.8 19.8 0 0 0 15.4 3a13.7 13.7 0 0 0-.63 1.27 18.4 18.4 0 0 0-5.54 0A13.7 13.7 0 0 0 8.6 3a19.8 19.8 0 0 0-4.9 1.37C1.4 7.9.8 11.35 1 14.75a19.9 19.9 0 0 0 5.98 3 14.5 14.5 0 0 0 1.28-2.08c-.7-.26-1.36-.58-1.98-.95.17-.13.34-.27.5-.42a13.8 13.8 0 0 0 10.45 0c.16.15.33.29.5.42-.62.37-1.28.69-1.98.95.38.74.82 1.43 1.28 2.08a19.9 19.9 0 0 0 5.98-3c.25-3.95-.43-7.36-2.71-10.38ZM8.77 12.66c-.97 0-1.76-.9-1.76-2s.77-2 1.76-2c1 0 1.78.9 1.76 2 0 1.1-.77 2-1.76 2Zm6.46 0c-.97 0-1.76-.9-1.76-2s.77-2 1.76-2c1 0 1.78.9 1.76 2 0 1.1-.77 2-1.76 2Z"
+        />
+      </svg>
+    `;
 
     if (avatarUrl) {
       avatar.src = avatarUrl;
