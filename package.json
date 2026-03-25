@@ -1,8 +1,11 @@
-﻿{
+{
   "name": "davis-project",
   "version": "1.0.0",
   "description": "Davis Project landing page with Discord auth",
   "main": "server.js",
+  "engines": {
+    "node": ">=20 <25"
+  },
   "scripts": {
     "start": "node server.js"
   },
