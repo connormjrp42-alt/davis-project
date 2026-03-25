@@ -3137,6 +3137,24 @@ async function fetchDiscordUserById(discordId, discordServerId = '') {
   return request;
 }
 
+async function fetchRemoteImageBuffer(url) {
+  const safeUrl = sanitizeUrl(url);
+  if (!safeUrl) return null;
+  try {
+    const response = await fetch(safeUrl);
+    if (!response.ok) return null;
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    if (!contentType.startsWith('image/')) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    return {
+      contentType,
+      buffer: Buffer.from(arrayBuffer),
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function enrichFactionProfileWithDiscord(profileInput) {
   const profile = normalizeFactionProfile(profileInput);
   const leaderDiscordData = await fetchDiscordUserById(profile.leaderDiscordId, profile.discordServerId);
@@ -4282,6 +4300,29 @@ app.get('/api/health/auth', (req, res) => {
       userIdPresent: Boolean(resolvedUser?.id),
     },
   });
+});
+
+app.get('/api/discord/users/:userId/avatar', async (req, res) => {
+  const userId = sanitizeText(req.params.userId, 40);
+  if (!/^\d{5,30}$/.test(userId)) {
+    return res.status(400).json({ error: 'invalid_user_id' });
+  }
+  const guildId = sanitizeText(req.query?.guildId, 40);
+  const safeGuildId = /^\d{5,30}$/.test(guildId) ? guildId : '';
+
+  const discordUser = await fetchDiscordUserById(userId, safeGuildId);
+  const fallbackUrl = buildDiscordAvatarUrl(userId, '', '');
+  const candidates = [discordUser?.avatarUrl || '', fallbackUrl].filter(Boolean);
+
+  for (const candidate of candidates) {
+    const image = await fetchRemoteImageBuffer(candidate);
+    if (!image?.buffer?.length) continue;
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.type(image.contentType || 'image/png');
+    return res.send(image.buffer);
+  }
+
+  return res.status(404).json({ error: 'avatar_not_found' });
 });
 
 app.get('/api/bot-builder/projects', requireAuth, (req, res) => {
