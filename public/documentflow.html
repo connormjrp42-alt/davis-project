@@ -63,64 +63,64 @@
           </div>
 
           <div id="docflowEditor" class="docflow-editor" hidden>
-            <div class="docflow-toolbar card">
-              <div class="docflow-toolbar-left">
-                <strong>Панель документа</strong>
-                <span id="docflowSaveState" class="docflow-save-state">Сохранено</span>
-              </div>
-              <div class="docflow-toolbar-actions">
-                <button id="docflowUndoBtn" class="cta cta-ghost" type="button">↶ Отменить</button>
-                <button id="docflowRedoBtn" class="cta cta-ghost" type="button">↷ Повторить</button>
-                <button id="docflowDuplicateBtn" class="cta cta-ghost" type="button">Дублировать</button>
-                <button id="docflowAlignLeft" class="cta cta-ghost" type="button">По левому</button>
-                <button id="docflowAlignCenter" class="cta cta-ghost" type="button">По центру</button>
-                <button id="docflowAlignRight" class="cta cta-ghost" type="button">По правому</button>
-                <button id="docflowBringFront" class="cta cta-ghost" type="button">Вперёд</button>
-                <button id="docflowSendBack" class="cta cta-ghost" type="button">Назад</button>
-              </div>
-              <div class="docflow-stylebar" id="docflowStyleBar">
-                <select id="docflowStyleFontFamily" title="Шрифт">
-                  <option value="'Times New Roman', Times, serif">Times New Roman</option>
-                  <option value="'Manrope', sans-serif">Manrope</option>
-                  <option value="'Unbounded', sans-serif">Unbounded</option>
-                </select>
-                <input id="docflowStyleFontSize" type="number" min="10" max="64" step="1" value="16" title="Размер шрифта" />
-                <input id="docflowStyleColor" type="color" value="#21183f" title="Цвет текста" />
-                <button id="docflowStyleBold" class="docflow-style-btn" type="button" title="Жирный">B</button>
-                <button id="docflowStyleItalic" class="docflow-style-btn" type="button" title="Курсив">I</button>
-                <button id="docflowStyleUnderline" class="docflow-style-btn" type="button" title="Подчёркнутый">U</button>
-                <button id="docflowStyleAlignLeft" class="docflow-style-btn" type="button" title="Выравнивание текста слева">≡</button>
-                <button id="docflowStyleAlignCenter" class="docflow-style-btn" type="button" title="Выравнивание текста по центру">≣</button>
-                <button id="docflowStyleAlignRight" class="docflow-style-btn" type="button" title="Выравнивание текста справа">☰</button>
-              </div>
-            </div>
-
-            <div class="docflow-template-meta">
-              <label>Название шаблона<input id="docflowMetaTitle" type="text" maxlength="120" /></label>
-              <label>Сервер<select id="docflowMetaServer"></select></label>
-              <label>Описание<input id="docflowMetaDescription" type="text" maxlength="500" /></label>
-            </div>
-
-            <div id="docflowTools" class="docflow-tools" hidden>
-              <button data-add="text" type="button">Текст</button>
-              <button data-add="heading" type="button">Заголовок</button>
-              <button data-add="image" type="button">Изображение</button>
-              <button data-add="date" type="button">Дата</button>
-              <button data-add="signature" type="button">Подпись</button>
-              <button data-add="line" type="button">Линия</button>
-            </div>
-
-            <div class="docflow-quick-tools">
-              <label>Масштаб <input id="docflowZoom" type="range" min="20" max="120" step="5" value="100" /></label>
-              <label class="docflow-checkbox"><input id="docflowSnap" type="checkbox" checked /> Привязка к сетке</label>
-            </div>
-
             <div class="docflow-builder-grid">
               <div id="docflowCanvasWrap" class="docflow-canvas-wrap">
                 <div id="docflowCanvas" class="docflow-canvas"></div>
               </div>
 
               <aside class="docflow-sidepanel">
+                <section class="docflow-toolbar card">
+                  <div class="docflow-toolbar-left">
+                    <strong>Панель документа</strong>
+                    <span id="docflowSaveState" class="docflow-save-state">Сохранено</span>
+                  </div>
+                  <div class="docflow-toolbar-actions">
+                    <button id="docflowUndoBtn" class="cta cta-ghost" type="button">↶ Отменить</button>
+                    <button id="docflowRedoBtn" class="cta cta-ghost" type="button">↷ Повторить</button>
+                    <button id="docflowDuplicateBtn" class="cta cta-ghost" type="button">Дублировать</button>
+                    <button id="docflowAlignLeft" class="cta cta-ghost" type="button">По левому</button>
+                    <button id="docflowAlignCenter" class="cta cta-ghost" type="button">По центру</button>
+                    <button id="docflowAlignRight" class="cta cta-ghost" type="button">По правому</button>
+                    <button id="docflowBringFront" class="cta cta-ghost" type="button">Вперёд</button>
+                    <button id="docflowSendBack" class="cta cta-ghost" type="button">Назад</button>
+                  </div>
+                  <div class="docflow-stylebar" id="docflowStyleBar">
+                    <select id="docflowStyleFontFamily" title="Шрифт">
+                      <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                      <option value="'Manrope', sans-serif">Manrope</option>
+                      <option value="'Unbounded', sans-serif">Unbounded</option>
+                    </select>
+                    <input id="docflowStyleFontSize" type="number" min="10" max="64" step="1" value="16" title="Размер шрифта" />
+                    <input id="docflowStyleColor" type="color" value="#21183f" title="Цвет текста" />
+                    <button id="docflowStyleBold" class="docflow-style-btn" type="button" title="Жирный">B</button>
+                    <button id="docflowStyleItalic" class="docflow-style-btn" type="button" title="Курсив">I</button>
+                    <button id="docflowStyleUnderline" class="docflow-style-btn" type="button" title="Подчёркнутый">U</button>
+                    <button id="docflowStyleAlignLeft" class="docflow-style-btn" type="button" title="Выравнивание текста слева">≡</button>
+                    <button id="docflowStyleAlignCenter" class="docflow-style-btn" type="button" title="Выравнивание текста по центру">≣</button>
+                    <button id="docflowStyleAlignRight" class="docflow-style-btn" type="button" title="Выравнивание текста справа">☰</button>
+                  </div>
+                </section>
+
+                <section class="docflow-template-meta">
+                  <label>Название шаблона<input id="docflowMetaTitle" type="text" maxlength="120" /></label>
+                  <label>Сервер<select id="docflowMetaServer"></select></label>
+                  <label>Описание<input id="docflowMetaDescription" type="text" maxlength="500" /></label>
+                </section>
+
+                <section id="docflowTools" class="docflow-tools" hidden>
+                  <button data-add="text" type="button">Текст</button>
+                  <button data-add="heading" type="button">Заголовок</button>
+                  <button data-add="image" type="button">Изображение</button>
+                  <button data-add="date" type="button">Дата</button>
+                  <button data-add="signature" type="button">Подпись</button>
+                  <button data-add="line" type="button">Линия</button>
+                </section>
+
+                <section class="docflow-quick-tools">
+                  <label>Масштаб <input id="docflowZoom" type="range" min="20" max="120" step="5" value="100" /></label>
+                  <label class="docflow-checkbox"><input id="docflowSnap" type="checkbox" checked /> Привязка к сетке</label>
+                </section>
+
                 <section class="docflow-layers">
                   <h3>Слои</h3>
                   <div id="docflowLayerList" class="docflow-layer-list"></div>
