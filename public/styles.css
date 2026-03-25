@@ -3410,11 +3410,13 @@ h1 span {
 .docflow-page-full .docflow-canvas-wrap {
   min-height: calc(100vh - 212px);
   max-height: calc(100vh - 212px);
-  overflow: auto;
+  overflow: hidden;
   padding: 14px;
   border-radius: 16px;
   border: 1px solid rgba(205, 165, 255, 0.24);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+  display: grid;
+  place-items: center;
 }
 
 .docflow-page-full .docflow-sidepanel {

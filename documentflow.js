@@ -973,8 +973,8 @@
 
   function fitCanvasToViewport(shouldRender = true) {
     if (!el.canvasWrap || !el.zoomRange || !state.template) return;
-    const availW = Math.max(300, el.canvasWrap.clientWidth - 8);
-    const availH = Math.max(260, el.canvasWrap.clientHeight - 8);
+    const availW = Math.max(280, el.canvasWrap.clientWidth - 36);
+    const availH = Math.max(220, el.canvasWrap.clientHeight - 36);
     const fit = Math.min(availW / DOC_WIDTH, availH / DOC_HEIGHT);
     const target = clamp(fit, 0.2, 1.2, 1);
     state.zoom = target;
