@@ -4,6 +4,7 @@
     'Los Angeles', 'Miami', 'Las Vegas', 'Washington', 'Dallas', 'Boston',
     'Houston', 'Seattle', 'Phoenix', 'Denver', 'Portland', 'Orlando',
   ];
+  const ORGANIZATIONS = ['Government', 'LSPD', 'LSCSD', 'FIB', 'EMS', 'Weazel News', 'Юридический отдел'];
 
   const state = {
     apiBase: '/api/docflow',
@@ -82,6 +83,10 @@
     styleAlignCenter: $('#docflowStyleAlignCenter'),
     styleAlignRight: $('#docflowStyleAlignRight'),
     focusBtn: $('#docflowFocusBtn'),
+    routeGateway: $('#docflowRouteGateway'),
+    routeList: $('#docflowRouteList'),
+    workspace: $('#docflowWorkspace'),
+    backToRoutesBtn: $('#docflowBackToRoutesBtn'),
   };
 
   const prop = {
@@ -402,6 +407,65 @@
       if (node) node.disabled = !isEdit;
     });
     updateUndoRedoButtons();
+  }
+  function openWorkspaceForRoute(server, organization) {
+    const safeServer = String(server || '').trim();
+    const safeOrg = String(organization || '').trim() || 'Организация';
+    if (el.workspace) el.workspace.hidden = false;
+    if (el.routeGateway) el.routeGateway.hidden = true;
+    if (el.serverFilter) {
+      el.serverFilter.value = safeServer;
+      renderTemplateList();
+    }
+    if (el.metaServer && !state.template) {
+      el.metaServer.value = safeServer;
+    }
+    if (el.title && !state.template) {
+      el.title.textContent = `${safeServer} · ${safeOrg} · Документооборот`;
+    }
+    status(`Путь открыт: ${safeServer} → ${safeOrg} → Документооборот`, false);
+    state.forceFitPage = true;
+    fitCanvasToViewport();
+  }
+  function showRouteGateway() {
+    if (el.workspace) el.workspace.hidden = true;
+    if (el.routeGateway) el.routeGateway.hidden = false;
+    status('', false);
+  }
+  function renderRouteGateway() {
+    if (!el.routeList) return;
+    el.routeList.innerHTML = '';
+    SERVERS.forEach((server) => {
+      const row = document.createElement('div');
+      row.className = 'docflow-route-item';
+
+      const path = document.createElement('div');
+      path.className = 'docflow-route-path';
+      path.innerHTML = `<strong>${server}</strong> <span>→</span> <em>Организация</em> <span>→</span> <strong>Документооборот</strong>`;
+
+      const controls = document.createElement('div');
+      controls.className = 'docflow-route-controls';
+
+      const orgSelect = document.createElement('select');
+      ORGANIZATIONS.forEach((org) => {
+        const option = document.createElement('option');
+        option.value = org;
+        option.textContent = org;
+        orgSelect.append(option);
+      });
+
+      const openBtn = document.createElement('button');
+      openBtn.type = 'button';
+      openBtn.className = 'cta cta-primary';
+      openBtn.textContent = 'Открыть документооборот';
+      openBtn.addEventListener('click', () => {
+        openWorkspaceForRoute(server, orgSelect.value);
+      });
+
+      controls.append(orgSelect, openBtn);
+      row.append(path, controls);
+      el.routeList.append(row);
+    });
   }
 
   function renderTemplateList() {
@@ -1275,6 +1339,11 @@
         fitCanvasToViewport();
       });
     }
+    if (el.backToRoutesBtn) {
+      el.backToRoutesBtn.addEventListener('click', () => {
+        showRouteGateway();
+      });
+    }
     if (el.modeBtn) el.modeBtn.addEventListener('click', () => {
       if (!canManage() || !state.template) return;
       state.mode = state.mode === 'edit' ? 'fill' : 'edit';
@@ -1460,6 +1529,8 @@
     try {
       await loadMeta();
       await loadTemplates();
+      renderRouteGateway();
+      showRouteGateway();
       bind();
       updateVisibility();
     } catch (error) {

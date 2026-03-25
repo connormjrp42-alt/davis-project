@@ -2980,6 +2980,67 @@ h1 span {
   font-size: 1.1rem;
 }
 
+.docflow-route-gateway {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(202, 162, 255, 0.3);
+  background: linear-gradient(170deg, rgba(40, 16, 66, 0.8), rgba(19, 8, 33, 0.84));
+}
+
+.docflow-route-gateway h2 {
+  margin: 0 0 8px;
+}
+
+.docflow-route-list {
+  display: grid;
+  gap: 8px;
+  max-height: calc(100vh - 210px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.docflow-route-item {
+  border: 1px solid rgba(205, 166, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.docflow-route-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: #e9dfff;
+}
+
+.docflow-route-path span {
+  color: #be93ff;
+}
+
+.docflow-route-path em {
+  font-style: normal;
+  color: #ffdca8;
+}
+
+.docflow-route-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.docflow-route-controls select {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font: inherit;
+  padding: 8px 10px;
+}
+
 .docflow-variant-b .docflow-actions {
   display: flex;
   flex-wrap: wrap;
@@ -3081,6 +3142,10 @@ h1 span {
     padding: 0;
     border: 0;
     background: transparent;
+  }
+
+  .docflow-route-controls {
+    grid-template-columns: 1fr;
   }
 }
 
