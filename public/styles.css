@@ -2970,7 +2970,9 @@ h1 span {
 
 .docflow-canvas {
   width: 210mm;
+  height: 297mm;
   min-height: 297mm;
+  aspect-ratio: 210 / 297;
   position: relative;
   background: #fff;
   border-radius: 0;
@@ -3223,7 +3225,9 @@ h1 span {
 
   .docflow-canvas {
     width: 794px;
+    height: 1123px;
     min-height: 1123px;
+    aspect-ratio: 794 / 1123;
   }
 
   .docflow-builder-grid {
@@ -3356,14 +3360,10 @@ h1 span {
 .docflow-page-full {
   width: calc(100vw - 20px);
   max-width: none;
-  margin: 22px auto 34px;
+  margin: 10px auto 24px;
   padding: 0 10px;
   display: grid;
   gap: 12px;
-}
-
-.docflow-page-full .docflow-top {
-  padding: 18px 20px;
 }
 
 .docflow-panel-title {
@@ -3390,7 +3390,7 @@ h1 span {
 }
 
 .docflow-page-full .docflow-work {
-  min-height: calc(100vh - 132px);
+  min-height: calc(100vh - 92px);
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 10px;
@@ -3408,8 +3408,8 @@ h1 span {
 }
 
 .docflow-page-full .docflow-canvas-wrap {
-  min-height: calc(100vh - 212px);
-  max-height: calc(100vh - 212px);
+  min-height: calc(100vh - 150px);
+  max-height: calc(100vh - 150px);
   overflow: hidden;
   padding: 14px;
   border-radius: 16px;
@@ -3423,7 +3423,7 @@ h1 span {
   display: grid;
   align-content: start;
   gap: 10px;
-  max-height: calc(100vh - 212px);
+  max-height: calc(100vh - 150px);
   top: 10px;
   overflow: auto;
 }
