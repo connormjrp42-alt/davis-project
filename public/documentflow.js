@@ -445,24 +445,16 @@
 
       const controls = document.createElement('div');
       controls.className = 'docflow-route-controls';
-
-      const orgSelect = document.createElement('select');
       ORGANIZATIONS.forEach((org) => {
-        const option = document.createElement('option');
-        option.value = org;
-        option.textContent = org;
-        orgSelect.append(option);
+        const openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'cta cta-ghost docflow-org-btn';
+        openBtn.textContent = `${org} → Документооборот`;
+        openBtn.addEventListener('click', () => {
+          openWorkspaceForRoute(server, org);
+        });
+        controls.append(openBtn);
       });
-
-      const openBtn = document.createElement('button');
-      openBtn.type = 'button';
-      openBtn.className = 'cta cta-primary';
-      openBtn.textContent = 'Открыть документооборот';
-      openBtn.addEventListener('click', () => {
-        openWorkspaceForRoute(server, orgSelect.value);
-      });
-
-      controls.append(orgSelect, openBtn);
       row.append(path, controls);
       el.routeList.append(row);
     });

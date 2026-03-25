@@ -3028,17 +3028,14 @@ h1 span {
 
 .docflow-route-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-.docflow-route-controls select {
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  font: inherit;
+.docflow-org-btn {
+  min-height: 36px;
   padding: 8px 10px;
+  font-size: 0.84rem;
 }
 
 .docflow-variant-b .docflow-actions {
