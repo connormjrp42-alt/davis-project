@@ -10,6 +10,15 @@ const iconv = require('iconv-lite');
 const app = express();
 const port = process.env.PORT || 3000;
 
+let WebSocketImpl = global.WebSocket;
+if (typeof WebSocketImpl !== 'function') {
+  try {
+    WebSocketImpl = require('ws');
+  } catch {
+    WebSocketImpl = null;
+  }
+}
+
 const {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
@@ -1234,7 +1243,7 @@ async function getGatewayMessageRaw(data) {
 }
 
 function sendGatewayPayload(session, payload) {
-  if (!session?.ws || session.ws.readyState !== WebSocket.OPEN) return;
+  if (!session?.ws || session.ws.readyState !== WebSocketImpl.OPEN) return;
   try {
     session.ws.send(JSON.stringify(payload || {}));
   } catch {
@@ -1281,13 +1290,13 @@ function stopBotDiscordGatewaySession(session, reason = 'stop') {
   if (!session) return;
   session.stopRequested = true;
   clearGatewayTimers(session);
-  if (session.ws && session.ws.readyState === WebSocket.OPEN) {
+  if (session.ws && session.ws.readyState === WebSocketImpl.OPEN) {
     try {
       session.ws.close(1000, reason.slice(0, 120));
     } catch {
       // ignore close errors
     }
-  } else if (session.ws && session.ws.readyState === WebSocket.CONNECTING) {
+  } else if (session.ws && session.ws.readyState === WebSocketImpl.CONNECTING) {
     try {
       session.ws.close();
     } catch {
@@ -1498,7 +1507,7 @@ async function handleBotDiscordGatewayMessage(session, raw) {
   }
 
   if (op === 7) {
-    if (session.ws && session.ws.readyState === WebSocket.OPEN) {
+    if (session.ws && session.ws.readyState === WebSocketImpl.OPEN) {
       try {
         session.ws.close(4000, 'gateway_reconnect');
       } catch {
@@ -1535,14 +1544,14 @@ async function handleBotDiscordGatewayMessage(session, raw) {
 }
 
 function connectBotDiscordGatewaySession(session, reason = 'connect') {
-  if (!session || session.stopRequested || typeof WebSocket !== 'function') return;
-  if (session.ws && (session.ws.readyState === WebSocket.OPEN || session.ws.readyState === WebSocket.CONNECTING)) {
+  if (!session || session.stopRequested || typeof WebSocketImpl !== 'function') return;
+  if (session.ws && (session.ws.readyState === WebSocketImpl.OPEN || session.ws.readyState === WebSocketImpl.CONNECTING)) {
     return;
   }
 
   const connectUrl = getDiscordGatewayConnectUrl(session);
   session.lastConnectReason = reason;
-  const ws = new WebSocket(connectUrl);
+  const ws = new WebSocketImpl(connectUrl);
   session.ws = ws;
 
   ws.addEventListener('open', () => {
@@ -1577,7 +1586,7 @@ function connectBotDiscordGatewaySession(session, reason = 'connect') {
 }
 
 async function syncBotGatewaySessions(reason = 'sync') {
-  if (typeof WebSocket !== 'function') return;
+  if (typeof WebSocketImpl !== 'function') return;
   const desired = collectDesiredBotDiscordGatewaySessions();
 
   for (const [key, session] of botDiscordGatewaySessions.entries()) {
@@ -1617,7 +1626,7 @@ async function syncBotGatewaySessions(reason = 'sync') {
 }
 
 function startBotGatewaySyncLoop() {
-  if (typeof WebSocket !== 'function') return;
+  if (typeof WebSocketImpl !== 'function') return;
   void syncBotGatewaySessions('startup');
   if (botDiscordGatewaySyncTimer) clearInterval(botDiscordGatewaySyncTimer);
   botDiscordGatewaySyncTimer = setInterval(() => {
@@ -7119,3 +7128,4 @@ startBotGatewaySyncLoop();
 app.listen(port, () => {
   console.log(`Davis Project server started on http://localhost:${port}`);
 });
+
