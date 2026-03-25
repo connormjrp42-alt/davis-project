@@ -231,6 +231,19 @@
     return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
   }
 
+  function getUnavatarDiscordUrl(discordId) {
+    const id = String(discordId || '').trim();
+    return /^\d{5,30}$/.test(id) ? `https://unavatar.io/discord/${id}` : '';
+  }
+
+  function getDiscordProxyAvatarUrl(discordId, discordServerId = '') {
+    const id = String(discordId || '').trim();
+    if (!/^\d{5,30}$/.test(id)) return '';
+    const guildId = String(discordServerId || '').trim();
+    const query = /^\d{5,30}$/.test(guildId) ? `?guildId=${encodeURIComponent(guildId)}` : '';
+    return `/api/discord/users/${encodeURIComponent(id)}/avatar${query}`;
+  }
+
   function extractDiscordUserIdFromProfileUrl(value) {
     const url = String(value || '').trim();
     if (!/^https?:\/\//i.test(url)) return '';
@@ -246,7 +259,9 @@
     const profileUrlRaw = String(options.profileUrl || '').trim();
     const profileUrl = /^https?:\/\//i.test(profileUrlRaw) ? profileUrlRaw : '';
     const avatarUrl = String(options.avatarUrl || '').trim();
+    const proxyAvatarUrl = String(options.proxyAvatarUrl || '').trim();
     const fallbackAvatarUrl = discordId ? getDiscordFallbackAvatar(discordId) : '';
+    const unavatarUrl = discordId ? getUnavatarDiscordUrl(discordId) : '';
     const compact = Boolean(options.compact);
 
     const root = document.createElement(profileUrl ? 'a' : 'div');
@@ -275,14 +290,14 @@
       </svg>
     `;
 
-    const primaryAvatarUrl = avatarUrl || fallbackAvatarUrl;
-    if (primaryAvatarUrl) {
-      avatar.src = primaryAvatarUrl;
+    const avatarCandidates = [proxyAvatarUrl, avatarUrl, unavatarUrl, fallbackAvatarUrl].filter(Boolean);
+    let avatarIndex = 0;
+    if (avatarCandidates.length) {
+      avatar.src = avatarCandidates[0];
       avatar.onerror = () => {
-        const current = String(avatar.src || '');
-        // First retry with Discord default avatar by user ID.
-        if (fallbackAvatarUrl && !current.includes('/embed/avatars/')) {
-          avatar.src = fallbackAvatarUrl;
+        avatarIndex += 1;
+        if (avatarCandidates[avatarIndex]) {
+          avatar.src = avatarCandidates[avatarIndex];
           return;
         }
         avatar.hidden = true;
@@ -657,7 +672,8 @@
             status: leaderDiscordData?.status || '',
             discordId: leaderResolvedId,
             profileUrl: leaderProfileUrl,
-              avatarUrl: leaderDiscordData?.avatarUrl || (leaderResolvedId ? getDiscordFallbackAvatar(leaderResolvedId) : ''),
+            avatarUrl: leaderDiscordData?.avatarUrl || '',
+            proxyAvatarUrl: getDiscordProxyAvatarUrl(leaderResolvedId, profile.discordServerId),
           })
         );
         el.mainLeaderDiscordCard.hidden = false;
@@ -696,7 +712,8 @@
               status: deputyDiscord?.status || '',
               discordId: deputyResolvedId,
               profileUrl: deputyProfileUrl,
-              avatarUrl: deputyDiscord?.avatarUrl || (deputyResolvedId ? getDiscordFallbackAvatar(deputyResolvedId) : ''),
+              avatarUrl: deputyDiscord?.avatarUrl || '',
+              proxyAvatarUrl: getDiscordProxyAvatarUrl(deputyResolvedId, profile.discordServerId),
               compact: true,
             })
           );
