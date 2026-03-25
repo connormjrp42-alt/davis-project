@@ -6933,9 +6933,6 @@ app.delete('/api/admin/pages/:slug', requireAdmin, (req, res) => {
 });
 
 app.get('/auth/discord', (req, res) => {
-  if (resolveAuthenticatedUser(req)) {
-    return res.redirect('/dashboard');
-  }
   if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
     return res.status(500).send('Discord OAuth не настроен. Проверьте .env');
   }
@@ -7042,6 +7039,7 @@ app.get('/auth/discord/callback', async (req, res) => {
 
 app.get('/auth/logout', (req, res) => {
   res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+  res.clearCookie('connect.sid', { path: '/' });
   req.session.destroy(() => {
     res.redirect('/');
   });
