@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const iconv = require('iconv-lite');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -142,8 +143,26 @@ function writeJSON(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
 }
 
+function repairMojibake(value) {
+  const text = typeof value === 'string' ? value : '';
+  if (!text) return '';
+  // Typical mojibake markers for UTF-8 text decoded as Windows-1251.
+  const hasSuspiciousChars =
+    /[\u0400-\u040F\u0450\u0452-\u045F]/.test(text) || /(?:\u0420|\u0421)[\u0400-\u04FF]/.test(text);
+  if (!hasSuspiciousChars) return text;
+  try {
+    const fixed = iconv.decode(iconv.encode(text, 'win1251'), 'utf8');
+    if (!fixed || fixed.includes('\uFFFD')) return text;
+    return fixed;
+  } catch (error) {
+    return text;
+  }
+}
+
 function sanitizeText(value, max = 1000) {
-  return typeof value === 'string' ? value.trim().slice(0, max) : '';
+  return repairMojibake(typeof value === 'string' ? value : '')
+    .trim()
+    .slice(0, max);
 }
 
 function parseCookieHeader(headerValue) {
