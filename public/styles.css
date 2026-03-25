@@ -2950,6 +2950,115 @@ h1 span {
   color: #fff;
 }
 
+.docflow-work-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1px solid rgba(205, 165, 255, 0.2);
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.docflow-work-topbar h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.docflow-variant-b .docflow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.docflow-variant-b .docflow-actions .cta {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+}
+
+.docflow-variant-b .docflow-layout {
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.docflow-variant-b .docflow-sidebar {
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(40, 17, 67, 0.78), rgba(24, 10, 41, 0.82));
+}
+
+.docflow-variant-b .docflow-work {
+  border-radius: 20px;
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.docflow-variant-b .docflow-builder-grid {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.docflow-variant-b .docflow-canvas-wrap {
+  border-radius: 18px;
+  border: 1px solid rgba(199, 160, 255, 0.35);
+  background:
+    radial-gradient(circle at 10% 14%, rgba(171, 119, 255, 0.08), transparent 42%),
+    radial-gradient(circle at 88% 82%, rgba(113, 195, 255, 0.08), transparent 40%),
+    rgba(15, 8, 27, 0.5);
+}
+
+.docflow-variant-b .docflow-sidepanel {
+  border-radius: 16px;
+  border: 1px solid rgba(197, 158, 255, 0.25);
+  background: rgba(23, 10, 39, 0.62);
+  padding: 10px;
+}
+
+.docflow-variant-b .docflow-toolbar,
+.docflow-variant-b .docflow-template-meta,
+.docflow-variant-b .docflow-tools,
+.docflow-variant-b .docflow-quick-tools,
+.docflow-variant-b .docflow-layers,
+.docflow-variant-b .docflow-properties {
+  border-radius: 12px;
+  border: 1px solid rgba(201, 164, 255, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.docflow-variant-b .docflow-toolbar-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 1320px) {
+  .docflow-variant-b .docflow-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .docflow-variant-b .docflow-builder-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .docflow-work-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .docflow-variant-b .docflow-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .docflow-variant-b .docflow-sidepanel {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+}
+
 .docflow-editor {
   display: grid;
   gap: 10px;
