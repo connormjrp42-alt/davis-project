@@ -3779,6 +3779,12 @@ body.motion-lite .bot-builder-actions-sticky {
   backdrop-filter: none !important;
 }
 
+/* Edge navigator fully disabled */
+#dpEdgeNavigator,
+.edge-nav {
+  display: none !important;
+}
+
 body.motion-lite .reveal {
   filter: none;
   transform: translateY(10px) scale(1);
