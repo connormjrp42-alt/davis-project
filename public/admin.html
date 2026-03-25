@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Davis Project | Админ панель</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/davis-logo.png" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .admin-page { width: min(1320px, 95%); margin: 28px auto 40px; display: grid; gap: 12px; }
+      .admin-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+      .admin-tab-btn { border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; font-weight:700; }
+      .admin-tab-btn.active { background: linear-gradient(135deg, rgba(159,72,255,.35), rgba(111,31,226,.25)); border-color: rgba(206,166,255,.7); }
+      .admin-layout { display:grid; grid-template-columns: minmax(320px, 420px) minmax(0,1fr); gap:12px; }
+      .admin-panel { padding:14px; display:grid; gap:10px; }
+      .admin-panel h3 { margin:0; }
+      .admin-panel label { display:grid; gap:6px; font-size:.9rem; }
+      .admin-panel input, .admin-panel textarea, .admin-panel select { border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); font:inherit; padding:8px 10px; }
+      .admin-actions { display:flex; gap:8px; flex-wrap:wrap; }
+      .admin-list { padding:10px; max-height:68vh; overflow:auto; display:grid; gap:8px; }
+      .admin-item { border:1px solid rgba(204,166,255,.24); border-radius:10px; background:rgba(255,255,255,.05); padding:10px; display:grid; gap:8px; }
+      .admin-item-head { display:flex; justify-content:space-between; gap:8px; align-items:center; }
+      .admin-item-title { font-weight:700; }
+      .admin-muted { color:var(--muted); font-size:.88rem; }
+      .admin-section { display:none; }
+      .admin-section.active { display:grid; gap:12px; }
+      .admin-badge { border-radius:999px; border:1px solid rgba(204,166,255,.3); padding:3px 8px; font-size:.78rem; }
+      .admin-perms { display:flex; gap:6px; flex-wrap:wrap; }
+      .admin-grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+      .admin-check { display:flex !important; align-items:center; gap:6px; }
+      .admin-check input { width:16px; height:16px; }
+      #adminStatus { min-height: 1.2em; color:#d8c2ff; }
+      @media (max-width: 980px) { .admin-layout { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="noise"></div>
+
+    <header class="header container">
+      <a class="brand" href="/">
+        <img class="brand-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
+        <span class="brand-text">Davis <span>Project</span></span>
+      </a>
+      <nav class="nav">
+        <a href="/">Главная</a>
+        <a href="/dashboard">Личный кабинет</a>
+        <a href="/admin" class="active">Админ панель</a>
+      </nav>
+      <a class="discord-btn" href="/auth/logout">Выйти</a>
+    </header>
+
+    <main class="admin-page">
+      <section class="card admin-panel">
+        <div class="admin-top">
+          <h1>Админ панель</h1>
+          <span class="admin-badge">Владелец: connordavis42</span>
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" data-tab="roles" type="button">Роли сервера</button>
+          <button class="admin-tab-btn" data-tab="participants" type="button">Участники</button>
+          <button class="admin-tab-btn" data-tab="logs" type="button">Логи</button>
+          <button class="admin-tab-btn" data-tab="posts" type="button">Посты проекта</button>
+        </div>
+        <p id="adminStatus"></p>
+      </section>
+
+      <section id="adminRoles" class="admin-section active">
+        <div class="admin-layout">
+          <section class="card admin-panel">
+            <h3>Создать роль</h3>
+            <label>Название роли <input id="roleName" type="text" maxlength="80" /></label>
+            <label>Цвет <input id="roleColor" type="color" value="#7d2dff" /></label>
+            <div class="admin-grid-2">
+              <label class="admin-check"><input id="permRoles" type="checkbox" /> Управлять ролями</label>
+              <label class="admin-check"><input id="permUsers" type="checkbox" /> Управлять участниками</label>
+              <label class="admin-check"><input id="permLogs" type="checkbox" checked /> Просмотр логов</label>
+              <label class="admin-check"><input id="permPosts" type="checkbox" /> Управлять постами</label>
+            </div>
+            <div class="admin-actions">
+              <button id="createRoleBtn" class="cta cta-primary" type="button">Создать роль</button>
+            </div>
+          </section>
+          <section class="card admin-list" id="rolesList"></section>
+        </div>
+      </section>
+
+      <section id="adminParticipants" class="admin-section">
+        <section class="card admin-list" id="participantsList"></section>
+      </section>
+
+      <section id="adminLogs" class="admin-section">
+        <div class="admin-layout">
+          <section class="card admin-panel">
+            <h3>Добавить запись</h3>
+            <label>Текст лога <textarea id="logMessage" rows="5" maxlength="1000"></textarea></label>
+            <div class="admin-actions">
+              <button id="addLogBtn" class="cta cta-primary" type="button">Добавить лог</button>
+            </div>
+          </section>
+          <section class="card admin-list" id="logsList"></section>
+        </div>
+      </section>
+
+      <section id="adminPosts" class="admin-section">
+        <div class="admin-layout">
+          <section class="card admin-panel">
+            <h3>Создать пост</h3>
+            <label>Заголовок <input id="postTitle" type="text" maxlength="100" /></label>
+            <label>Текст <textarea id="postText" rows="8" maxlength="4000"></textarea></label>
+            <label>URL изображения <input id="postImageUrl" type="url" maxlength="2048" /></label>
+            <label class="admin-check"><input id="postPublished" type="checkbox" checked /> Опубликовать</label>
+            <div class="admin-actions">
+              <button id="createPostBtn" class="cta cta-primary" type="button">Создать пост</button>
+            </div>
+          </section>
+          <section class="card admin-list" id="postsList"></section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>

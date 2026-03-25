@@ -40,6 +40,8 @@ const TABS_FILE = path.join(__dirname, 'data', 'tabs.json');
 const TAB_BLOCKS_FILE = path.join(__dirname, 'data', 'tab-blocks.json');
 const POSTS_FILE = path.join(__dirname, 'data', 'posts.json');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const SERVER_ROLES_FILE = path.join(__dirname, 'data', 'server-roles.json');
+const ADMIN_LOGS_FILE = path.join(__dirname, 'data', 'admin-logs.json');
 const NAVIGATOR_FILE = path.join(__dirname, 'data', 'page-navigators.json');
 const LAW_CACHE_FILE = path.join(__dirname, 'data', 'law-cache.json');
 const DOC_TEMPLATES_FILE = path.join(__dirname, 'data', 'doc-templates.json');
@@ -90,6 +92,7 @@ const DISCORD_USER_CACHE_TTL_MS = 10 * 60 * 1000;
 const DISCORD_GUILD_MEMBER_CACHE_TTL_MS = 3 * 60 * 1000;
 const AUTH_COOKIE_NAME = 'dp_auth';
 const AUTH_COOKIE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const ADMIN_LOGS_LIMIT = 1500;
 const discordUserCache = new Map();
 const discordUserInFlight = new Map();
 const discordGuildMemberCache = new Map();
@@ -123,6 +126,35 @@ const DEFAULT_POSTS = [
     buttonText: 'Читать',
     buttonUrl: '#about',
     published: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+const DEFAULT_SERVER_ROLES = [
+  {
+    id: crypto.randomUUID(),
+    name: 'Модератор постов',
+    color: '#7d2dff',
+    permissions: {
+      canManageRoles: false,
+      canManageParticipants: false,
+      canViewLogs: true,
+      canManagePosts: true,
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: 'Куратор участников',
+    color: '#2d8cff',
+    permissions: {
+      canManageRoles: false,
+      canManageParticipants: true,
+      canViewLogs: true,
+      canManagePosts: false,
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -2377,6 +2409,60 @@ async function notifyBotFamilyApplicantDm({ botToken, applicantDiscordId, embeds
   return { ok: true };
 }
 
+function normalizeRolePermissions(input) {
+  const row = input && typeof input === 'object' ? input : {};
+  return {
+    canManageRoles: Boolean(row.canManageRoles),
+    canManageParticipants: Boolean(row.canManageParticipants),
+    canViewLogs: Boolean(row.canViewLogs),
+    canManagePosts: Boolean(row.canManagePosts),
+  };
+}
+
+function normalizeServerRoles(input) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((row) => {
+      const name = sanitizeText(row.name, 80);
+      const color = sanitizeText(row.color, 20);
+      if (!name) return null;
+      return {
+        id: sanitizeText(row.id, 80) || crypto.randomUUID(),
+        name,
+        color: /^#[0-9a-f]{3,8}$/i.test(color) ? color : '#7d2dff',
+        permissions: normalizeRolePermissions(row.permissions),
+        createdAt: sanitizeText(row.createdAt, 80) || new Date().toISOString(),
+        updatedAt: sanitizeText(row.updatedAt, 80) || new Date().toISOString(),
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 200);
+}
+
+function normalizeAdminLogs(input) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((row) => {
+      const action = sanitizeText(row.action, 120);
+      if (!action) return null;
+      return {
+        id: sanitizeText(row.id, 80) || crypto.randomUUID(),
+        action,
+        section: sanitizeText(row.section, 80) || 'general',
+        level: ['info', 'warn', 'error'].includes(sanitizeText(row.level, 20).toLowerCase())
+          ? sanitizeText(row.level, 20).toLowerCase()
+          : 'info',
+        message: sanitizeText(row.message, 1000),
+        actor: sanitizeText(row.actor, 120),
+        createdAt: sanitizeText(row.createdAt, 80) || new Date().toISOString(),
+        meta: row.meta && typeof row.meta === 'object' ? row.meta : {},
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+    .slice(0, ADMIN_LOGS_LIMIT);
+}
+
 function resolveApplicantDiscordId(row) {
   const entry = row && typeof row === 'object' ? row : {};
   const candidates = [
@@ -3940,6 +4026,8 @@ let tabs = normalizeTabs(readJSON(TABS_FILE, DEFAULT_TABS));
 let tabBlocks = normalizeTabBlocks(readJSON(TAB_BLOCKS_FILE, {}));
 let posts = normalizePosts(readJSON(POSTS_FILE, DEFAULT_POSTS));
 let participants = normalizeUsers(readJSON(USERS_FILE, []));
+let serverRoles = normalizeServerRoles(readJSON(SERVER_ROLES_FILE, DEFAULT_SERVER_ROLES));
+let adminLogs = normalizeAdminLogs(readJSON(ADMIN_LOGS_FILE, []));
 let pageNavigators = normalizeNavigatorMap(readJSON(NAVIGATOR_FILE, {}));
 let lawCacheByServer = normalizeLawCache(readJSON(LAW_CACHE_FILE, {}));
 let docTemplates = normalizeDocTemplates(readJSON(DOC_TEMPLATES_FILE, []));
@@ -4005,6 +4093,8 @@ writeJSON(TABS_FILE, tabs);
 writeJSON(TAB_BLOCKS_FILE, tabBlocks);
 writeJSON(POSTS_FILE, posts);
 writeJSON(USERS_FILE, participants);
+writeJSON(SERVER_ROLES_FILE, serverRoles);
+writeJSON(ADMIN_LOGS_FILE, adminLogs);
 writeJSON(NAVIGATOR_FILE, pageNavigators);
 writeJSON(LAW_CACHE_FILE, lawCacheByServer);
 writeJSON(DOC_TEMPLATES_FILE, docTemplates);
@@ -4016,6 +4106,24 @@ writeJSON(BOT_FAMILY_APPLICATIONS_FILE, botFamilyApplicationsStore);
 writeJSON(BOT_CONTRACT_REPORTS_FILE, botContractReportsStore);
 fs.mkdirSync(PAGES_DIR, { recursive: true });
 fs.mkdirSync(FACTIONS_UPLOAD_DIR, { recursive: true });
+
+function addAdminLog({ action, section = 'general', level = 'info', message = '', actor = '', meta = {} }) {
+  const entry = {
+    id: crypto.randomUUID(),
+    action: sanitizeText(action, 120),
+    section: sanitizeText(section, 80) || 'general',
+    level: ['info', 'warn', 'error'].includes(String(level || '').toLowerCase())
+      ? String(level || '').toLowerCase()
+      : 'info',
+    message: sanitizeText(message, 1000),
+    actor: sanitizeText(actor, 120),
+    createdAt: new Date().toISOString(),
+    meta: meta && typeof meta === 'object' ? meta : {},
+  };
+  if (!entry.action) return;
+  adminLogs = normalizeAdminLogs([entry, ...adminLogs]);
+  writeJSON(ADMIN_LOGS_FILE, adminLogs);
+}
 
 function upsertParticipant(user) {
   if (!user || !user.id) return;
@@ -6602,6 +6710,20 @@ app.get('/dashboard', (req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+app.get('/admin', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  const authUser = resolveAuthenticatedUser(req);
+  if (!authUser) {
+    return res.redirect('/auth/discord');
+  }
+  if (!isAdminUser(authUser)) {
+    return res.redirect('/dashboard');
+  }
+  return res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 app.get('/api/settings', requireAuth, (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.set('Pragma', 'no-cache');
@@ -6638,10 +6760,6 @@ app.post('/api/settings', requireAuth, (req, res) => {
 
   req.session.settings = nextSettings;
   return res.json({ ok: true, settings: nextSettings });
-});
-
-app.use('/api/admin', (req, res) => {
-  return res.status(410).json({ error: 'admin_panel_disabled' });
 });
 
 app.get('/api/admin/content', requireAdmin, (req, res) => {
@@ -6844,6 +6962,13 @@ app.post('/api/admin/posts', requireAdmin, (req, res) => {
 
   posts = normalizePosts([post, ...posts]);
   writeJSON(POSTS_FILE, posts);
+  addAdminLog({
+    action: 'post_created',
+    section: 'posts',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Создан пост "${post.title}".`,
+    meta: { postId: post.id },
+  });
   return res.json({ ok: true, post, posts });
 });
 
@@ -6870,11 +6995,19 @@ app.put('/api/admin/posts/:id', requireAdmin, (req, res) => {
   posts[index] = next;
   posts = normalizePosts(posts);
   writeJSON(POSTS_FILE, posts);
+  addAdminLog({
+    action: 'post_updated',
+    section: 'posts',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Обновлен пост "${next.title}".`,
+    meta: { postId: next.id },
+  });
   return res.json({ ok: true, post: next, posts });
 });
 
 app.delete('/api/admin/posts/:id', requireAdmin, (req, res) => {
   const id = sanitizeText(req.params.id, 80);
+  const removed = posts.find((row) => row.id === id);
   const nextPosts = posts.filter((row) => row.id !== id);
 
   if (nextPosts.length === posts.length) {
@@ -6883,12 +7016,118 @@ app.delete('/api/admin/posts/:id', requireAdmin, (req, res) => {
 
   posts = normalizePosts(nextPosts);
   writeJSON(POSTS_FILE, posts);
+  addAdminLog({
+    action: 'post_deleted',
+    section: 'posts',
+    level: 'warn',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Удален пост "${sanitizeText(removed?.title, 100) || id}".`,
+    meta: { postId: id },
+  });
   return res.json({ ok: true, posts });
 });
 
 app.get('/api/admin/users', requireAdmin, (req, res) => {
   const sorted = [...participants].sort((a, b) => (a.lastSeenAt < b.lastSeenAt ? 1 : -1));
   return res.json({ users: sorted });
+});
+
+app.get('/api/admin/roles', requireAdmin, (req, res) => {
+  return res.json({ roles: serverRoles });
+});
+
+app.post('/api/admin/roles', requireAdmin, (req, res) => {
+  const name = sanitizeText(req.body?.name, 80);
+  const color = sanitizeText(req.body?.color, 20);
+  if (!name) {
+    return res.status(400).json({ error: 'invalid_payload', message: 'Укажите название роли.' });
+  }
+  const role = {
+    id: crypto.randomUUID(),
+    name,
+    color: /^#[0-9a-f]{3,8}$/i.test(color) ? color : '#7d2dff',
+    permissions: normalizeRolePermissions(req.body?.permissions),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  serverRoles = normalizeServerRoles([role, ...serverRoles]);
+  writeJSON(SERVER_ROLES_FILE, serverRoles);
+  addAdminLog({
+    action: 'role_created',
+    section: 'roles',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Создана роль "${role.name}".`,
+    meta: { roleId: role.id },
+  });
+  return res.json({ ok: true, role, roles: serverRoles });
+});
+
+app.put('/api/admin/roles/:id', requireAdmin, (req, res) => {
+  const id = sanitizeText(req.params.id, 80);
+  const index = serverRoles.findIndex((row) => row.id === id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+  const current = serverRoles[index];
+  const next = {
+    ...current,
+    name: sanitizeText(req.body?.name, 80) || current.name,
+    color: /^#[0-9a-f]{3,8}$/i.test(sanitizeText(req.body?.color, 20))
+      ? sanitizeText(req.body?.color, 20)
+      : current.color,
+    permissions: normalizeRolePermissions(req.body?.permissions),
+    updatedAt: new Date().toISOString(),
+  };
+  serverRoles[index] = next;
+  serverRoles = normalizeServerRoles(serverRoles);
+  writeJSON(SERVER_ROLES_FILE, serverRoles);
+  addAdminLog({
+    action: 'role_updated',
+    section: 'roles',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Обновлена роль "${next.name}".`,
+    meta: { roleId: next.id },
+  });
+  return res.json({ ok: true, role: next, roles: serverRoles });
+});
+
+app.delete('/api/admin/roles/:id', requireAdmin, (req, res) => {
+  const id = sanitizeText(req.params.id, 80);
+  const current = serverRoles.find((row) => row.id === id);
+  const next = serverRoles.filter((row) => row.id !== id);
+  if (next.length === serverRoles.length) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+  serverRoles = normalizeServerRoles(next);
+  writeJSON(SERVER_ROLES_FILE, serverRoles);
+  addAdminLog({
+    action: 'role_deleted',
+    section: 'roles',
+    level: 'warn',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Удалена роль "${sanitizeText(current?.name, 80)}".`,
+    meta: { roleId: id },
+  });
+  return res.json({ ok: true, roles: serverRoles });
+});
+
+app.get('/api/admin/logs', requireAdmin, (req, res) => {
+  return res.json({ logs: adminLogs });
+});
+
+app.post('/api/admin/logs', requireAdmin, (req, res) => {
+  const message = sanitizeText(req.body?.message, 1000);
+  if (!message) {
+    return res.status(400).json({ error: 'invalid_payload', message: 'Добавьте текст записи.' });
+  }
+  addAdminLog({
+    action: 'manual_note',
+    section: 'logs',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message,
+    level: 'info',
+  });
+  return res.json({ ok: true, logs: adminLogs });
 });
 
 app.get('/api/admin/navigator', requireAdmin, (req, res) => {
