@@ -2971,6 +2971,9 @@ h1 span {
 .docflow-canvas {
   width: 210mm;
   height: 297mm;
+  max-width: 210mm;
+  max-height: 297mm;
+  min-width: 210mm;
   min-height: 297mm;
   aspect-ratio: 210 / 297;
   position: relative;
@@ -3226,6 +3229,9 @@ h1 span {
   .docflow-canvas {
     width: 794px;
     height: 1123px;
+    max-width: 794px;
+    max-height: 1123px;
+    min-width: 794px;
     min-height: 1123px;
     aspect-ratio: 794 / 1123;
   }
