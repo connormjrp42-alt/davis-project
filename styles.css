@@ -3019,6 +3019,27 @@ h1 span {
   background: rgba(178, 111, 255, 0.12);
 }
 
+.docflow-route-accordion {
+  grid-template-columns: 1fr;
+  padding: 0;
+  overflow: hidden;
+}
+
+.docflow-route-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 9px 10px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.docflow-route-summary::-webkit-details-marker {
+  display: none;
+}
+
+.docflow-route-accordion[open] .docflow-route-summary {
+  border-bottom: 1px solid rgba(203, 164, 255, 0.28);
+}
+
 .docflow-route-left {
   display: flex;
   align-items: center;
@@ -3051,6 +3072,10 @@ h1 span {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 6px;
+}
+
+.docflow-route-controls-accordion {
+  padding: 10px;
 }
 
 .docflow-org-btn {

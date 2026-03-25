@@ -436,9 +436,12 @@
     if (!el.routeList) return;
     el.routeList.innerHTML = '';
     SERVERS.forEach((server, idx) => {
-      const row = document.createElement('div');
-      row.className = 'docflow-route-item';
+      const row = document.createElement('details');
+      row.className = 'docflow-route-item docflow-route-accordion';
+      if (idx === 0) row.open = true;
 
+      const summary = document.createElement('summary');
+      summary.className = 'docflow-route-summary';
       const left = document.createElement('div');
       left.className = 'docflow-route-left';
       const index = document.createElement('span');
@@ -449,11 +452,12 @@
       title.textContent = server;
       const meta = document.createElement('span');
       meta.className = 'docflow-route-meta';
-      meta.textContent = 'Документооборот';
+      meta.textContent = `${ORGANIZATIONS.length} организаций`;
       left.append(index, title, meta);
+      summary.append(left);
 
       const controls = document.createElement('div');
-      controls.className = 'docflow-route-controls';
+      controls.className = 'docflow-route-controls docflow-route-controls-accordion';
       ORGANIZATIONS.forEach((org) => {
         const openBtn = document.createElement('button');
         openBtn.type = 'button';
@@ -465,7 +469,7 @@
         });
         controls.append(openBtn);
       });
-      row.append(left, controls);
+      row.append(summary, controls);
       el.routeList.append(row);
     });
   }
