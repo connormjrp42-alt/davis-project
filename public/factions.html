@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Davis Project | Р¤СЂР°РєС†РёРё</title>
+    <title>Davis Project | Фракции</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,108 +21,108 @@
 
     <header class="header container">
       <a class="brand" href="/">
-        <img class="brand-logo" src="/assets/davis-logo.png" alt="Р›РѕРіРѕС‚РёРї Davis Project" />
+        <img class="brand-logo" src="/assets/davis-logo.png" alt="Логотип Davis Project" />
         <span class="brand-text">Davis <span>Project</span></span>
       </a>
       <nav class="nav" id="mainNav">
-        <a href="/">Р“Р»Р°РІРЅР°СЏ</a>
-        <a href="/consultant">РљРѕРЅСЃСѓР»СЊС‚Р°РЅС‚</a>
-        <a href="/documentflow">Р”РѕРєСѓРјРµРЅС‚РѕРѕР±РѕСЂРѕС‚</a>
-        <a href="/factions" class="active">Р¤СЂР°РєС†РёРё</a>
-        <a href="/bot-builder">РЎРѕР·РґР°РЅРёРµ Р±РѕС‚Р°</a>
+        <a href="/">Главная</a>
+        <a href="/consultant">Консультант</a>
+        <a href="/documentflow">Документооборот</a>
+        <a href="/factions" class="active">Фракции</a>
+        <a href="/bot-builder">Создание бота</a>
       </nav>
-      <a class="discord-btn" href="/auth/discord">Р’РѕР№С‚Рё С‡РµСЂРµР· Discord</a>
+      <a class="discord-btn" href="/auth/discord">Войти через Discord</a>
     </header>
 
     <main class="container factions-page">
       <p id="factionsStatus" class="factions-status"></p>
 
       <section id="factionsListView" class="card factions-wrap reveal visible">
-        <h1>Р¤СЂР°РєС†РёРё</h1>
-        <p class="factions-subtitle">РќР° СЌС‚РѕР№ СЃС‚СЂР°РЅРёС†Рµ РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ РґРѕР±Р°РІР»РµРЅРЅС‹Рµ С„СЂР°РєС†РёРё.</p>
+        <h1>Фракции</h1>
+        <p class="factions-subtitle">На этой странице отображаются только добавленные фракции.</p>
         <div id="factionsGrid" class="factions-grid">
-          <button id="factionAddCard" type="button" class="faction-add-card" aria-label="Р”РѕР±Р°РІРёС‚СЊ С„СЂР°РєС†РёСЋ">
+          <button id="factionAddCard" type="button" class="faction-add-card" aria-label="Добавить фракцию">
             <span class="faction-add-plus">+</span>
-            <span class="faction-add-text">Р”РѕР±Р°РІРёС‚СЊ С„СЂР°РєС†РёСЋ</span>
+            <span class="faction-add-text">Добавить фракцию</span>
           </button>
         </div>
       </section>
 
       <section id="factionDetailView" class="card faction-detail reveal visible" hidden>
         <div class="faction-detail-head">
-          <a class="cta cta-ghost" href="/factions">в†ђ Рљ СЃРїРёСЃРєСѓ С„СЂР°РєС†РёР№</a>
-          <h1 id="factionDetailTitle">Р¤СЂР°РєС†РёСЏ</h1>
-          <button id="detailDeleteFactionBtn" class="faction-mini-btn danger" type="button" hidden>РЈРґР°Р»РёС‚СЊ С„СЂР°РєС†РёСЋ</button>
+          <a class="cta cta-ghost" href="/factions">← К списку фракций</a>
+          <h1 id="factionDetailTitle">Фракция</h1>
+          <button id="detailDeleteFactionBtn" class="faction-mini-btn danger" type="button" hidden>Удалить фракцию</button>
         </div>
 
         <div class="faction-subnav" id="factionSubnav">
-          <button class="faction-subnav-btn active" data-section="main" type="button">Р“Р»Р°РІРЅР°СЏ</button>
-          <button class="faction-subnav-btn" data-section="memos" type="button">РџР°РјСЏС‚РєРё</button>
-          <button class="faction-subnav-btn" data-section="tests" type="button">РўРµСЃС‚С‹</button>
-          <button class="faction-subnav-btn" data-section="rosters" type="button">РЎРѕСЃС‚Р°РІС‹</button>
-          <button class="faction-subnav-btn" data-section="applications" type="button">Р—Р°СЏРІР»РµРЅРёСЏ</button>
+          <button class="faction-subnav-btn active" data-section="main" type="button">Главная</button>
+          <button class="faction-subnav-btn" data-section="memos" type="button">Памятки</button>
+          <button class="faction-subnav-btn" data-section="tests" type="button">Тесты</button>
+          <button class="faction-subnav-btn" data-section="rosters" type="button">Составы</button>
+          <button class="faction-subnav-btn" data-section="applications" type="button">Заявления</button>
         </div>
 
         <section class="faction-section active" data-section="main">
           <div class="faction-main-grid">
             <article class="faction-main-card">
-              <img id="factionBannerPreview" class="faction-main-banner" alt="Р‘Р°РЅРЅРµСЂ С„СЂР°РєС†РёРё" />
+              <img id="factionBannerPreview" class="faction-main-banner" alt="Баннер фракции" />
               <div class="faction-main-header">
-                <img id="factionAvatarPreview" class="faction-main-avatar" alt="РђРІР°С‚Р°СЂ С„СЂР°РєС†РёРё" />
+                <img id="factionAvatarPreview" class="faction-main-avatar" alt="Аватар фракции" />
                 <div>
-                  <h2 id="factionMainName">РќР°Р·РІР°РЅРёРµ С„СЂР°РєС†РёРё</h2>
+                  <h2 id="factionMainName">Название фракции</h2>
                   <p id="factionMainLeader" class="faction-main-meta"></p>
                   <p id="factionMainLeaderDiscordId" class="faction-main-meta"></p>
-                  <a id="factionMainLeaderDiscordProfile" class="faction-main-discord-link" href="#" target="_blank" rel="noopener noreferrer" hidden>РџСЂРѕС„РёР»СЊ Discord</a>
+                  <a id="factionMainLeaderDiscordProfile" class="faction-main-discord-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Профиль Discord</a>
                   <div id="factionMainLeaderDiscordCard" class="faction-leader-discord-card-slot" hidden></div>
                 </div>
               </div>
-              <h3>Р—Р°РјРµСЃС‚РёС‚РµР»Рё</h3>
+              <h3>Заместители</h3>
               <ul id="factionMainDeputies" class="faction-main-list"></ul>
-              <h3>Р§РµРј Р·Р°РЅРёРјР°РµС‚СЃСЏ С„СЂР°РєС†РёСЏ</h3>
+              <h3>Чем занимается фракция</h3>
               <p id="factionMainAbout" class="faction-main-about"></p>
             </article>
 
             <form id="factionProfileForm" class="faction-subform" hidden>
-              <h3>Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё С„СЂР°РєС†РёРё</h3>
+              <h3>Редактирование информации фракции</h3>
               <label>
-                Р›РёРґРµСЂ
-                <input id="profileLeaderInput" type="text" maxlength="120" placeholder="РРјСЏ Р»РёРґРµСЂР°" />
+                Лидер
+                <input id="profileLeaderInput" type="text" maxlength="120" placeholder="Имя лидера" />
               </label>
               <label>
-                Discord ID Р»РёРґРµСЂР°
-                <input id="profileLeaderDiscordIdInput" type="text" inputmode="numeric" maxlength="30" placeholder="РќР°РїСЂРёРјРµСЂ: 953290565838053466" />
+                Discord ID лидера
+                <input id="profileLeaderDiscordIdInput" type="text" inputmode="numeric" maxlength="30" placeholder="Например: 953290565838053466" />
               </label>
               <label>
-                РЎСЃС‹Р»РєР° РЅР° РїСЂРѕС„РёР»СЊ Discord Р»РёРґРµСЂР° (СЂРµР·РµСЂРІ, РµСЃР»Рё API РЅРµРґРѕСЃС‚СѓРїРµРЅ)
+                Ссылка на профиль Discord лидера (резерв, если API недоступен)
                 <input id="profileLeaderDiscordProfileInput" type="url" maxlength="2048" placeholder="https://discord.com/users/953290565838053466" />
               </label>
               <label>
-                Р—Р°РјРµСЃС‚РёС‚РµР»Рё (РєР°Р¶РґС‹Р№ СЃ РЅРѕРІРѕР№ СЃС‚СЂРѕРєРё)
-                <textarea id="profileDeputiesInput" rows="6" maxlength="6000" placeholder="РљР°Р¶РґР°СЏ СЃС‚СЂРѕРєР°: РРјСЏ | DiscordID | РЎСЃС‹Р»РєР° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)"></textarea>
-                <small class="faction-form-hint">РџСЂРёРјРµСЂ: Niko Legis | 953290565838053466 | https://discord.com/users/953290565838053466</small>
+                Заместители (каждый с новой строки)
+                <textarea id="profileDeputiesInput" rows="6" maxlength="6000" placeholder="Каждая строка: Имя | DiscordID | Ссылка (необязательно)"></textarea>
+                <small class="faction-form-hint">Пример: Niko Legis | 953290565838053466 | https://discord.com/users/953290565838053466</small>
               </label>
               <label>
-                Р§РµРј Р·Р°РЅРёРјР°РµС‚СЃСЏ С„СЂР°РєС†РёСЏ
+                Чем занимается фракция
                 <textarea id="profileAboutInput" rows="6" maxlength="5000"></textarea>
               </label>
               <label>
-                ID Discord-СЃРµСЂРІРµСЂР° С„СЂР°РєС†РёРё
-                <input id="profileDiscordServerIdInput" type="text" inputmode="numeric" maxlength="30" placeholder="РќР°РїСЂРёРјРµСЂ: 123456789012345678" />
+                ID Discord-сервера фракции
+                <input id="profileDiscordServerIdInput" type="text" inputmode="numeric" maxlength="30" placeholder="Например: 123456789012345678" />
               </label>
               <label>
-                РњРµРЅРµРґР¶РµСЂС‹ РґРѕСЃС‚СѓРїР° (С‡РµСЂРµР· Р·Р°РїСЏС‚СѓСЋ, С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°)
+                Менеджеры доступа (через запятую, только для администратора)
                 <input id="profileManagersInput" type="text" maxlength="1000" placeholder="connordavis42, username2" />
               </label>
               <label>
-                РќРѕРІС‹Р№ Р°РІР°С‚Р°СЂ
+                Новый аватар
                 <input id="profileAvatarInput" type="file" accept="image/*" />
               </label>
               <label>
-                РќРѕРІС‹Р№ Р±Р°РЅРЅРµСЂ
+                Новый баннер
                 <input id="profileBannerInput" type="file" accept="image/*" />
               </label>
-              <button class="cta cta-primary" type="submit">РЎРѕС…СЂР°РЅРёС‚СЊ РіР»Р°РІРЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ</button>
+              <button class="cta cta-primary" type="submit">Сохранить главную информацию</button>
             </form>
           </div>
         </section>
@@ -130,36 +130,36 @@
         <section class="faction-section" data-section="memos">
           <div class="faction-pane-grid">
             <form id="memoForm" class="faction-subform" hidden>
-              <h3>РќРѕРІР°СЏ РїР°РјСЏС‚РєР°</h3>
-              <label>Р—Р°РіРѕР»РѕРІРѕРє <input id="memoTitle" type="text" maxlength="120" required /></label>
-              <label>РўРµРєСЃС‚ <textarea id="memoContent" rows="6" maxlength="6000"></textarea></label>
-              <label>Р§РµРє-Р»РёСЃС‚ (РїСѓРЅРєС‚С‹ СЃ РЅРѕРІРѕР№ СЃС‚СЂРѕРєРё) <textarea id="memoChecklist" rows="4" maxlength="3000"></textarea></label>
+              <h3>Новая памятка</h3>
+              <label>Заголовок <input id="memoTitle" type="text" maxlength="120" required /></label>
+              <label>Текст <textarea id="memoContent" rows="6" maxlength="6000"></textarea></label>
+              <label>Чек-лист (пункты с новой строки) <textarea id="memoChecklist" rows="4" maxlength="3000"></textarea></label>
               <div class="faction-inline-grid">
                 <label>
-                  РљР°С‚РµРіРѕСЂРёСЏ
-                  <input id="memoCategory" type="text" maxlength="80" placeholder="РќР°РїСЂРёРјРµСЂ: Р”РёСЃС†РёРїР»РёРЅР°" />
+                  Категория
+                  <input id="memoCategory" type="text" maxlength="80" placeholder="Например: Дисциплина" />
                 </label>
               </div>
               <label>
-                РўРµРіРё (С‡РµСЂРµР· Р·Р°РїСЏС‚СѓСЋ)
-                <input id="memoTags" type="text" maxlength="400" placeholder="РЅРѕРІРёС‡РѕРє, СѓСЃС‚Р°РІ, РЅР°РєР°Р·Р°РЅРёСЏ" />
+                Теги (через запятую)
+                <input id="memoTags" type="text" maxlength="400" placeholder="новичок, устав, наказания" />
               </label>
               <label class="doc-el-check">
                 <input id="memoPinned" type="checkbox" />
-                Р—Р°РєСЂРµРїРёС‚СЊ РїР°РјСЏС‚РєСѓ СЃРІРµСЂС…Сѓ
+                Закрепить памятку сверху
               </label>
-              <button class="cta cta-primary" type="submit">РЎРѕР·РґР°С‚СЊ РїР°РјСЏС‚РєСѓ</button>
+              <button class="cta cta-primary" type="submit">Создать памятку</button>
             </form>
             <div>
-              <h3>РџР°РјСЏС‚РєРё С„СЂР°РєС†РёРё</h3>
+              <h3>Памятки фракции</h3>
               <div class="faction-memo-toolbar">
                 <label>
-                  РџРѕРёСЃРє
-                  <input id="memoSearchInput" type="text" maxlength="120" placeholder="РџРѕ Р·Р°РіРѕР»РѕРІРєСѓ, С‚РµРєСЃС‚Сѓ РёР»Рё С‚РµРіР°Рј" />
+                  Поиск
+                  <input id="memoSearchInput" type="text" maxlength="120" placeholder="По заголовку, тексту или тегам" />
                 </label>
                 <label>
-                  Р¤РёР»СЊС‚СЂ РєР°С‚РµРіРѕСЂРёРё
-                  <input id="memoFilterCategory" type="text" maxlength="80" placeholder="РљР°С‚РµРіРѕСЂРёСЏ" />
+                  Фильтр категории
+                  <input id="memoFilterCategory" type="text" maxlength="80" placeholder="Категория" />
                 </label>
               </div>
               <div id="memoList" class="faction-stack"></div>
@@ -170,27 +170,27 @@
         <section class="faction-section" data-section="tests">
           <div class="faction-pane-grid">
             <form id="testForm" class="faction-subform" hidden>
-              <h3>РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ С‚РµСЃС‚Р°</h3>
-              <label>РќР°Р·РІР°РЅРёРµ С‚РµСЃС‚Р° <input id="testTitle" type="text" maxlength="120" required /></label>
-              <label>РћРїРёСЃР°РЅРёРµ <textarea id="testDescription" rows="3" maxlength="2000"></textarea></label>
-              <label>РџСЂРѕС…РѕРґРЅРѕР№ Р±Р°Р»Р» (%) <input id="testPassPercent" type="number" min="1" max="100" value="70" /></label>
-              <label>Discord Webhook РґР»СЏ СЌС‚РѕРіРѕ С‚РµСЃС‚Р° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ) <input id="testWebhookInput" type="url" maxlength="2048" placeholder="https://discord.com/api/webhooks/..." /></label>
+              <h3>Конструктор теста</h3>
+              <label>Название теста <input id="testTitle" type="text" maxlength="120" required /></label>
+              <label>Описание <textarea id="testDescription" rows="3" maxlength="2000"></textarea></label>
+              <label>Проходной балл (%) <input id="testPassPercent" type="number" min="1" max="100" value="70" /></label>
+              <label>Discord Webhook для этого теста (необязательно) <input id="testWebhookInput" type="url" maxlength="2048" placeholder="https://discord.com/api/webhooks/..." /></label>
               <div class="faction-inline-header">
-                <h4>Р’РѕРїСЂРѕСЃС‹</h4>
-                <button id="testAddQuestionBtn" class="cta cta-ghost" type="button">+ Р’РѕРїСЂРѕСЃ</button>
+                <h4>Вопросы</h4>
+                <button id="testAddQuestionBtn" class="cta cta-ghost" type="button">+ Вопрос</button>
               </div>
               <div id="testQuestions" class="faction-stack"></div>
-              <button class="cta cta-primary" type="submit">РЎРѕС…СЂР°РЅРёС‚СЊ С‚РµСЃС‚</button>
+              <button class="cta cta-primary" type="submit">Сохранить тест</button>
             </form>
             <div>
-              <h3>РўРµСЃС‚С‹ С„СЂР°РєС†РёРё</h3>
+              <h3>Тесты фракции</h3>
               <div id="testList" class="faction-stack"></div>
               <div id="testRunner" class="faction-runner" hidden>
-                <h3 id="testRunnerTitle">РџСЂРѕС…РѕР¶РґРµРЅРёРµ С‚РµСЃС‚Р°</h3>
+                <h3 id="testRunnerTitle">Прохождение теста</h3>
                 <form id="testRunnerForm" class="faction-subform">
-                  <label>Р’Р°С€Рµ РёРјСЏ <input id="testRunnerRespondent" type="text" maxlength="80" required /></label>
+                  <label>Ваше имя <input id="testRunnerRespondent" type="text" maxlength="80" required /></label>
                   <div id="testRunnerQuestions" class="faction-stack"></div>
-                  <button class="cta cta-primary" type="submit">РћС‚РїСЂР°РІРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚</button>
+                  <button class="cta cta-primary" type="submit">Отправить результат</button>
                 </form>
                 <p id="testRunnerResult" class="factions-status"></p>
               </div>
@@ -201,12 +201,12 @@
         <section class="faction-section" data-section="rosters">
           <div class="faction-pane-grid">
             <form id="rosterForm" class="faction-subform" hidden>
-              <h3>РќРѕРІС‹Р№ СЃРѕСЃС‚Р°РІ</h3>
-              <label>РќР°Р·РІР°РЅРёРµ СЃРѕСЃС‚Р°РІР° <input id="rosterTitle" type="text" maxlength="120" required /></label>
-              <button class="cta cta-primary" type="submit">РЎРѕР·РґР°С‚СЊ СЃРѕСЃС‚Р°РІ</button>
+              <h3>Новый состав</h3>
+              <label>Название состава <input id="rosterTitle" type="text" maxlength="120" required /></label>
+              <button class="cta cta-primary" type="submit">Создать состав</button>
             </form>
             <div>
-              <h3>РЎРѕСЃС‚Р°РІС‹ С„СЂР°РєС†РёРё</h3>
+              <h3>Составы фракции</h3>
               <div id="rosterList" class="faction-stack"></div>
             </div>
           </div>
@@ -215,26 +215,26 @@
         <section class="faction-section" data-section="applications">
           <div class="faction-pane-grid">
             <form id="applicationBuilderForm" class="faction-subform" hidden>
-              <h3>РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ Р·Р°СЏРІР»РµРЅРёСЏ</h3>
-              <label>РќР°Р·РІР°РЅРёРµ С„РѕСЂРјС‹ <input id="applicationTitleInput" type="text" maxlength="120" required /></label>
-              <label>РћРїРёСЃР°РЅРёРµ <textarea id="applicationDescriptionInput" rows="3" maxlength="2000"></textarea></label>
+              <h3>Конструктор заявления</h3>
+              <label>Название формы <input id="applicationTitleInput" type="text" maxlength="120" required /></label>
+              <label>Описание <textarea id="applicationDescriptionInput" rows="3" maxlength="2000"></textarea></label>
               <label>Discord Webhook <input id="applicationWebhookInput" type="url" maxlength="2048" placeholder="https://discord.com/api/webhooks/..." required /></label>
               <div class="faction-inline-header">
-                <h4>РџРѕР»СЏ С„РѕСЂРјС‹</h4>
-                <button id="applicationAddFieldBtn" class="cta cta-ghost" type="button">+ РџРѕР»Рµ</button>
+                <h4>Поля формы</h4>
+                <button id="applicationAddFieldBtn" class="cta cta-ghost" type="button">+ Поле</button>
               </div>
               <div id="applicationFieldsBuilder" class="faction-stack"></div>
-              <button class="cta cta-primary" type="submit">РЎРѕР·РґР°С‚СЊ С„РѕСЂРјСѓ Р·Р°СЏРІР»РµРЅРёСЏ</button>
+              <button class="cta cta-primary" type="submit">Создать форму заявления</button>
             </form>
             <div>
-              <h3>Р¤РѕСЂРјС‹ Р·Р°СЏРІР»РµРЅРёР№</h3>
+              <h3>Формы заявлений</h3>
               <div id="applicationList" class="faction-stack"></div>
               <div id="applicationRunner" class="faction-runner" hidden>
-                <h3 id="applicationRunnerTitle">Р—Р°РїРѕР»РЅРµРЅРёРµ Р·Р°СЏРІР»РµРЅРёСЏ</h3>
+                <h3 id="applicationRunnerTitle">Заполнение заявления</h3>
                 <form id="applicationRunnerForm" class="faction-subform">
-                  <label>Р’Р°С€Рµ РёРјСЏ <input id="applicationApplicantInput" type="text" maxlength="120" /></label>
+                  <label>Ваше имя <input id="applicationApplicantInput" type="text" maxlength="120" /></label>
                   <div id="applicationRunnerFields" class="faction-stack"></div>
-                  <button class="cta cta-primary" type="submit">РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІР»РµРЅРёРµ</button>
+                  <button class="cta cta-primary" type="submit">Отправить заявление</button>
                 </form>
                 <p id="applicationRunnerResult" class="factions-status"></p>
               </div>
@@ -246,23 +246,23 @@
 
     <div id="factionModal" class="faction-modal" hidden>
       <div class="faction-modal-box">
-        <h2>РќРѕРІР°СЏ С„СЂР°РєС†РёСЏ</h2>
+        <h2>Новая фракция</h2>
         <form id="factionForm" class="faction-form">
           <label>
-            РќР°Р·РІР°РЅРёРµ С„СЂР°РєС†РёРё
-            <input id="factionName" type="text" maxlength="80" placeholder="РќР°РїСЂРёРјРµСЂ: LSPD" required />
+            Название фракции
+            <input id="factionName" type="text" maxlength="80" placeholder="Например: LSPD" required />
           </label>
           <label>
-            РђРІР°С‚Р°СЂ С„СЂР°РєС†РёРё
+            Аватар фракции
             <input id="factionAvatar" type="file" accept="image/*" />
           </label>
           <label>
-            Р‘Р°РЅРЅРµСЂ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)
+            Баннер (необязательно)
             <input id="factionBanner" type="file" accept="image/*" />
           </label>
           <div class="faction-form-actions">
-            <button class="cta cta-primary" type="submit">РЎРѕР·РґР°С‚СЊ</button>
-            <button id="factionCancelBtn" class="cta cta-ghost" type="button">РћС‚РјРµРЅР°</button>
+            <button class="cta cta-primary" type="submit">Создать</button>
+            <button id="factionCancelBtn" class="cta cta-ghost" type="button">Отмена</button>
           </div>
         </form>
       </div>
@@ -272,6 +272,7 @@
     <script src="/factions.js"></script>
   </body>
 </html>
+
 
 
 

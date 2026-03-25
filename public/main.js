@@ -378,34 +378,8 @@ function bindEdgeSpy(items) {
 }
 
 async function hydrateEdgeNavigator() {
-  const nav = ensureEdgeNavigator();
-  const list = nav.querySelector('#dpEdgeNavigatorList');
-  if (!list) return;
-
-  try {
-    const response = await fetch(`/api/navigator?path=${encodeURIComponent(currentPath)}`);
-    const data = await response.json();
-    const items = data.items || [];
-
-    list.innerHTML = '';
-    if (!items.length) {
-      nav.style.display = 'none';
-      return;
-    }
-
-    nav.style.display = '';
-    items.forEach((item) => {
-      const link = document.createElement('a');
-      link.href = item.target;
-      link.textContent = item.label;
-      list.append(link);
-    });
-
-    bindEdgeSpy(items);
-  } catch (error) {
-    nav.style.display = 'none';
-    console.error('Navigator hydration error:', error);
-  }
+  const existing = document.getElementById('dpEdgeNavigator');
+  if (existing) existing.remove();
 }
 
 async function hydrateAuthState() {
@@ -452,7 +426,6 @@ async function initPage() {
   await hydrateLayout();
   await hydrateTabs();
   await hydratePosts();
-  await hydrateEdgeNavigator();
   await hydrateAuthState();
 }
 
