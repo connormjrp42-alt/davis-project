@@ -14,6 +14,10 @@ async function api(url, options = {}) {
   return data;
 }
 
+const adminState = {
+  roles: [],
+};
+
 function setStatus(text, isError = false) {
   const node = document.getElementById('adminStatus');
   if (!node) return;
@@ -25,6 +29,15 @@ function fmtDate(value) {
   const d = new Date(value || '');
   if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleString('ru-RU');
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function initTabs() {
@@ -56,23 +69,64 @@ function rolePermsFromForm() {
   };
 }
 
+function getRoleById(roleId) {
+  return adminState.roles.find((role) => role.id === roleId) || null;
+}
+
+function renderRoleBadges(roleIds) {
+  const ids = Array.isArray(roleIds) ? roleIds : [];
+  if (!ids.length) {
+    return '<span class="admin-badge">Без ролей</span>';
+  }
+  return ids
+    .map((roleId) => {
+      const role = getRoleById(roleId);
+      if (!role) return '';
+      const color = role.color || '#bda2ff';
+      return `<span class="admin-badge" style="border-color:${escapeHtml(color)};color:${escapeHtml(color)}">${escapeHtml(role.name)}</span>`;
+    })
+    .filter(Boolean)
+    .join('');
+}
+
+function renderRoleEditor(roleIds) {
+  if (!adminState.roles.length) {
+    return '<p class="admin-muted">Сначала создайте роли в разделе «Роли сервера».</p>';
+  }
+  const selectedSet = new Set(Array.isArray(roleIds) ? roleIds : []);
+  return adminState.roles
+    .map((role) => {
+      const checked = selectedSet.has(role.id) ? 'checked' : '';
+      return `
+        <label class="admin-check admin-role-check">
+          <input type="checkbox" value="${escapeHtml(role.id)}" ${checked} />
+          <span>${escapeHtml(role.name)}</span>
+        </label>
+      `;
+    })
+    .join('');
+}
+
 async function loadRoles() {
   const wrap = document.getElementById('rolesList');
   if (!wrap) return;
   const data = await api('/api/admin/roles');
   const roles = Array.isArray(data.roles) ? data.roles : [];
+  adminState.roles = roles;
+
   wrap.innerHTML = '';
   if (!roles.length) {
     wrap.innerHTML = '<p class="admin-muted">Ролей пока нет.</p>';
     return;
   }
+
   roles.forEach((role) => {
     const item = document.createElement('article');
     item.className = 'admin-item';
     item.innerHTML = `
       <div class="admin-item-head">
-        <span class="admin-item-title">${role.name}</span>
-        <span class="admin-badge" style="border-color:${role.color}; color:${role.color}">${role.color}</span>
+        <span class="admin-item-title">${escapeHtml(role.name)}</span>
+        <span class="admin-badge" style="border-color:${escapeHtml(role.color)}; color:${escapeHtml(role.color)}">${escapeHtml(role.color)}</span>
       </div>
       <div class="admin-perms">
         ${role.permissions?.canManageRoles ? '<span class="admin-badge">Роли</span>' : ''}
@@ -81,7 +135,7 @@ async function loadRoles() {
         ${role.permissions?.canManagePosts ? '<span class="admin-badge">Посты</span>' : ''}
       </div>
       <div class="admin-actions">
-        <button class="cta cta-ghost" data-action="delete-role" data-id="${role.id}" type="button">Удалить</button>
+        <button class="cta cta-ghost" data-action="delete-role" data-id="${escapeHtml(role.id)}" type="button">Удалить</button>
       </div>
     `;
     wrap.append(item);
@@ -95,8 +149,7 @@ async function loadRoles() {
       try {
         await api(`/api/admin/roles/${encodeURIComponent(id)}`, { method: 'DELETE' });
         setStatus('Роль удалена.');
-        await loadRoles();
-        await loadLogs();
+        await Promise.all([loadRoles(), loadParticipants(), loadLogs()]);
       } catch (error) {
         setStatus(`Ошибка удаления роли: ${error.message}`, true);
       }
@@ -114,20 +167,52 @@ async function loadParticipants() {
     wrap.innerHTML = '<p class="admin-muted">Участников пока нет.</p>';
     return;
   }
+
   users.forEach((user) => {
     const name = user.global_name || user.username || user.id;
+    const roleIds = Array.isArray(user.roleIds) ? user.roleIds : [];
     const item = document.createElement('article');
     item.className = 'admin-item';
     item.innerHTML = `
       <div class="admin-item-head">
-        <span class="admin-item-title">${name}</span>
-        <span class="admin-badge">ID: ${user.id}</span>
+        <span class="admin-item-title">${escapeHtml(name)}</span>
+        <span class="admin-badge">ID: ${escapeHtml(user.id)}</span>
       </div>
-      <div class="admin-muted">Логин: ${user.username || '—'}</div>
-      <div class="admin-muted">Последний вход: ${fmtDate(user.lastSeenAt)}</div>
-      <div class="admin-muted">Входов: ${Number(user.loginCount || 0)}</div>
+      <div class="admin-muted">Логин: ${escapeHtml(user.username || '—')}</div>
+      <div class="admin-muted">Последний вход: ${escapeHtml(fmtDate(user.lastSeenAt))}</div>
+      <div class="admin-muted">Входов: ${escapeHtml(Number(user.loginCount || 0))}</div>
+      <div class="admin-perms">${renderRoleBadges(roleIds)}</div>
+      <div class="admin-role-editor" data-user-id="${escapeHtml(user.id)}">
+        ${renderRoleEditor(roleIds)}
+      </div>
+      <div class="admin-actions">
+        <button class="cta cta-primary" data-action="save-user-roles" data-id="${escapeHtml(user.id)}" type="button">Сохранить роли</button>
+      </div>
     `;
     wrap.append(item);
+  });
+
+  wrap.querySelectorAll('[data-action="save-user-roles"]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const userId = button.dataset.id;
+      if (!userId) return;
+      const editor = wrap.querySelector(`.admin-role-editor[data-user-id="${CSS.escape(userId)}"]`);
+      if (!editor) return;
+      const selectedIds = Array.from(editor.querySelectorAll('input[type="checkbox"]:checked'))
+        .map((node) => String(node.value || '').trim())
+        .filter(Boolean);
+
+      try {
+        await api(`/api/admin/users/${encodeURIComponent(userId)}/roles`, {
+          method: 'PUT',
+          body: JSON.stringify({ roleIds: selectedIds }),
+        });
+        setStatus('Роли участника обновлены.');
+        await Promise.all([loadParticipants(), loadLogs()]);
+      } catch (error) {
+        setStatus(`Ошибка сохранения ролей: ${error.message}`, true);
+      }
+    });
   });
 }
 
@@ -146,12 +231,12 @@ async function loadLogs() {
     item.className = 'admin-item';
     item.innerHTML = `
       <div class="admin-item-head">
-        <span class="admin-item-title">${log.action}</span>
-        <span class="admin-badge">${log.level || 'info'}</span>
+        <span class="admin-item-title">${escapeHtml(log.action)}</span>
+        <span class="admin-badge">${escapeHtml(log.level || 'info')}</span>
       </div>
-      <div class="admin-muted">${log.section || 'general'} • ${fmtDate(log.createdAt)}</div>
-      <div>${log.message || ''}</div>
-      <div class="admin-muted">Исполнитель: ${log.actor || '—'}</div>
+      <div class="admin-muted">${escapeHtml(log.section || 'general')} • ${escapeHtml(fmtDate(log.createdAt))}</div>
+      <div>${escapeHtml(log.message || '')}</div>
+      <div class="admin-muted">Исполнитель: ${escapeHtml(log.actor || '—')}</div>
     `;
     wrap.append(item);
   });
@@ -172,16 +257,16 @@ async function loadPosts() {
     item.className = 'admin-item';
     item.innerHTML = `
       <div class="admin-item-head">
-        <span class="admin-item-title">${post.title}</span>
+        <span class="admin-item-title">${escapeHtml(post.title)}</span>
         <span class="admin-badge">${post.published ? 'Опубликован' : 'Черновик'}</span>
       </div>
-      <div class="admin-muted">Обновлено: ${fmtDate(post.updatedAt)}</div>
-      <div>${String(post.text || '').slice(0, 260)}</div>
+      <div class="admin-muted">Обновлено: ${escapeHtml(fmtDate(post.updatedAt))}</div>
+      <div>${escapeHtml(String(post.text || '').slice(0, 260))}</div>
       <div class="admin-actions">
-        <button class="cta cta-ghost" data-action="toggle-post" data-id="${post.id}" data-published="${post.published ? '1' : '0'}" type="button">
+        <button class="cta cta-ghost" data-action="toggle-post" data-id="${escapeHtml(post.id)}" data-published="${post.published ? '1' : '0'}" type="button">
           ${post.published ? 'Снять с публикации' : 'Опубликовать'}
         </button>
-        <button class="cta cta-ghost" data-action="delete-post" data-id="${post.id}" type="button">Удалить</button>
+        <button class="cta cta-ghost" data-action="delete-post" data-id="${escapeHtml(post.id)}" type="button">Удалить</button>
       </div>
     `;
     wrap.append(item);
@@ -198,8 +283,7 @@ async function loadPosts() {
           body: JSON.stringify({ published: !published }),
         });
         setStatus('Статус поста обновлен.');
-        await loadPosts();
-        await loadLogs();
+        await Promise.all([loadPosts(), loadLogs()]);
       } catch (error) {
         setStatus(`Ошибка обновления поста: ${error.message}`, true);
       }
@@ -214,8 +298,7 @@ async function loadPosts() {
       try {
         await api(`/api/admin/posts/${encodeURIComponent(id)}`, { method: 'DELETE' });
         setStatus('Пост удален.');
-        await loadPosts();
-        await loadLogs();
+        await Promise.all([loadPosts(), loadLogs()]);
       } catch (error) {
         setStatus(`Ошибка удаления поста: ${error.message}`, true);
       }
@@ -240,8 +323,7 @@ function bindActions() {
         });
         setStatus('Роль создана.');
         document.getElementById('roleName').value = '';
-        await loadRoles();
-        await loadLogs();
+        await Promise.all([loadRoles(), loadParticipants(), loadLogs()]);
       } catch (error) {
         setStatus(`Ошибка создания роли: ${error.message}`, true);
       }
@@ -288,8 +370,7 @@ function bindActions() {
         document.getElementById('postText').value = '';
         document.getElementById('postImageUrl').value = '';
         document.getElementById('postPublished').checked = true;
-        await loadPosts();
-        await loadLogs();
+        await Promise.all([loadPosts(), loadLogs()]);
       } catch (error) {
         setStatus(`Ошибка создания поста: ${error.message}`, true);
       }
@@ -306,7 +387,8 @@ async function init() {
     }
     initTabs();
     bindActions();
-    await Promise.all([loadRoles(), loadParticipants(), loadLogs(), loadPosts()]);
+    await loadRoles();
+    await Promise.all([loadParticipants(), loadLogs(), loadPosts()]);
     setStatus('Админ панель загружена.');
   } catch (error) {
     setStatus(`Ошибка загрузки админки: ${error.message}`, true);

@@ -509,6 +509,9 @@ function normalizeUsers(input) {
         global_name: sanitizeText(item.global_name, 80),
         avatar: sanitizeText(item.avatar, 120),
         email: sanitizeText(item.email, 120),
+        roleIds: Array.isArray(item.roleIds)
+          ? item.roleIds.map((row) => sanitizeText(row, 80)).filter(Boolean).slice(0, 50)
+          : [],
         firstSeenAt: sanitizeText(item.firstSeenAt, 60) || new Date().toISOString(),
         lastSeenAt: sanitizeText(item.lastSeenAt, 60) || new Date().toISOString(),
         loginCount: Number.isFinite(Number(item.loginCount)) ? Number(item.loginCount) : 1,
@@ -4138,6 +4141,7 @@ function upsertParticipant(user) {
       global_name: sanitizeText(user.global_name, 80),
       avatar: sanitizeText(user.avatar, 120),
       email: sanitizeText(user.email, 120),
+      roleIds: [],
       firstSeenAt: now,
       lastSeenAt: now,
       loginCount: 1,
@@ -4150,6 +4154,7 @@ function upsertParticipant(user) {
       global_name: sanitizeText(user.global_name, 80),
       avatar: sanitizeText(user.avatar, 120),
       email: sanitizeText(user.email, 120),
+      roleIds: Array.isArray(current.roleIds) ? current.roleIds.slice(0, 50) : [],
       lastSeenAt: now,
       loginCount: (current.loginCount || 0) + 1,
     };
@@ -7032,6 +7037,53 @@ app.get('/api/admin/users', requireAdmin, (req, res) => {
   return res.json({ users: sorted });
 });
 
+app.put('/api/admin/users/:id/roles', requireAdmin, (req, res) => {
+  const userId = sanitizeText(req.params.id, 80);
+  if (!userId) {
+    return res.status(400).json({ error: 'invalid_payload', message: 'Не указан пользователь.' });
+  }
+
+  const userIndex = participants.findIndex((row) => row.id === userId);
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'not_found', message: 'Участник не найден.' });
+  }
+
+  const requestedRoleIds = Array.isArray(req.body?.roleIds)
+    ? req.body.roleIds.map((row) => sanitizeText(row, 80)).filter(Boolean)
+    : [];
+  const uniqueRoleIds = [...new Set(requestedRoleIds)].slice(0, 50);
+  const allowedRoleIdSet = new Set(serverRoles.map((row) => row.id));
+  const invalidRoleIds = uniqueRoleIds.filter((id) => !allowedRoleIdSet.has(id));
+  if (invalidRoleIds.length) {
+    return res.status(400).json({
+      error: 'invalid_payload',
+      message: 'Содержатся несуществующие роли.',
+    });
+  }
+
+  participants[userIndex] = {
+    ...participants[userIndex],
+    roleIds: uniqueRoleIds,
+  };
+  participants = normalizeUsers(participants);
+  writeJSON(USERS_FILE, participants);
+
+  const roleNames = serverRoles
+    .filter((role) => uniqueRoleIds.includes(role.id))
+    .map((role) => role.name)
+    .join(', ');
+
+  addAdminLog({
+    action: 'participant_roles_updated',
+    section: 'participants',
+    actor: sanitizeText(req.session.user?.username || req.session.user?.global_name, 120),
+    message: `Обновлены роли участника "${sanitizeText(participants[userIndex]?.username || userId, 80)}"${roleNames ? `: ${roleNames}` : ' (без ролей)'}.`,
+    meta: { userId, roleIds: uniqueRoleIds },
+  });
+
+  return res.json({ ok: true, user: participants[userIndex] });
+});
+
 app.get('/api/admin/roles', requireAdmin, (req, res) => {
   return res.json({ roles: serverRoles });
 });
@@ -7100,6 +7152,15 @@ app.delete('/api/admin/roles/:id', requireAdmin, (req, res) => {
   }
   serverRoles = normalizeServerRoles(next);
   writeJSON(SERVER_ROLES_FILE, serverRoles);
+
+  participants = normalizeUsers(
+    participants.map((user) => ({
+      ...user,
+      roleIds: Array.isArray(user.roleIds) ? user.roleIds.filter((roleId) => roleId !== id) : [],
+    }))
+  );
+  writeJSON(USERS_FILE, participants);
+
   addAdminLog({
     action: 'role_deleted',
     section: 'roles',
