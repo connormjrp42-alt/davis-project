@@ -332,49 +332,11 @@ async function hydratePosts() {
 }
 
 function ensureEdgeNavigator() {
-  let nav = document.getElementById('dpEdgeNavigator');
-  if (nav) return nav;
-  nav = document.createElement('aside');
-  nav.id = 'dpEdgeNavigator';
-  nav.className = 'edge-nav';
-  nav.innerHTML = `
-    <div class="edge-nav-title">Навигатор</div>
-    <nav id="dpEdgeNavigatorList" class="edge-nav-list"></nav>
-  `;
-  document.body.append(nav);
-  return nav;
+  return null;
 }
 
 function bindEdgeSpy(items) {
-  const links = Array.from(document.querySelectorAll('#dpEdgeNavigatorList a'));
-  if (!links.length || !items.length) return;
-
-  const setActive = (target) => {
-    links.forEach((link) => {
-      link.classList.toggle('active', link.getAttribute('href') === target);
-    });
-  };
-
-  const hashItems = items.filter((item) => item.target.startsWith('#'));
-  if (!hashItems.length) return;
-
-  setActive(hashItems[0].target);
-
-  const io = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible?.target?.id) return;
-      setActive(`#${visible.target.id}`);
-    },
-    { rootMargin: '-20% 0px -65% 0px', threshold: [0.15, 0.35, 0.55] }
-  );
-
-  hashItems.forEach((item) => {
-    const section = document.getElementById(item.target.slice(1));
-    if (section) io.observe(section);
-  });
+  return;
 }
 
 async function hydrateEdgeNavigator() {
