@@ -25,36 +25,6 @@ function enhanceRevealStagger() {
   });
 }
 
-function initScrollProgress() {
-  if (document.getElementById('dpScrollProgress')) return;
-  const bar = document.createElement('div');
-  bar.id = 'dpScrollProgress';
-  bar.className = 'scroll-progress';
-  document.body.append(bar);
-
-  let ticking = false;
-  const update = () => {
-    const max = Math.max(
-      1,
-      (document.documentElement.scrollHeight || 0) - (window.innerHeight || 0)
-    );
-    const y = window.scrollY || window.pageYOffset || 0;
-    const ratio = Math.max(0, Math.min(1, y / max));
-    bar.style.transform = `scaleX(${ratio})`;
-    ticking = false;
-  };
-
-  const onScroll = () => {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(update);
-  };
-
-  update();
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-}
-
 function initHeaderState() {
   const header = document.querySelector('.header');
   if (!header) return;
@@ -475,7 +445,6 @@ async function hydrateAuthState() {
 async function initPage() {
   initMotionPreset();
   enhanceRevealStagger();
-  initScrollProgress();
   initHeaderState();
   initTiltMotion();
   markActivePageLink();

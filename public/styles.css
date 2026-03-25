@@ -3428,19 +3428,6 @@ body::after {
   margin-bottom: 40px;
 }
 
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2100;
-  height: 3px;
-  transform: scaleX(0);
-  transform-origin: left center;
-  background: linear-gradient(90deg, rgba(107, 215, 255, 0.95), rgba(183, 129, 255, 0.98), rgba(247, 171, 255, 0.96));
-  box-shadow: 0 0 16px rgba(131, 211, 255, 0.7);
-}
-
 .header {
   border-radius: 22px;
   border: 1px solid rgba(214, 170, 255, 0.28);
