@@ -218,6 +218,8 @@
       if (data.mode === 'cache') {
         const cacheTime = data.cacheUpdatedAt ? new Date(data.cacheUpdatedAt).toLocaleString('ru-RU') : 'неизвестно';
         setStatus(`Ответ сформирован из локальной базы (кэш от ${cacheTime}).`, false);
+      } else if (data.mode === 'no-cache') {
+        setStatus('Для этого сервера нет локальной базы. Подключи сессию форума пользователя.', true);
       } else if (data.mode === 'user-session') {
         setStatus('Готово. Ответ собран через подключенную сессию пользователя на форуме.', false);
       } else {

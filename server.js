@@ -6411,19 +6411,27 @@ app.post('/api/consultant/ask', async (req, res) => {
       });
     }
 
-    const syncResult = await refreshServerLawCache(server, 'manual-question');
-    if (!syncResult.ok) {
-      throw new Error(syncResult.error || 'sync_failed');
+    const cached = lawCacheByServer[server];
+    if (!cached || !Array.isArray(cached.docs) || !cached.docs.length) {
+      return res.json({
+        ok: true,
+        server,
+        mode: 'no-cache',
+        cacheUpdatedAt: null,
+        trace: [],
+        answer:
+          'Для выбранного сервера пока нет локальной базы законодательства. Подключите сессию форума пользователя выше и повторите запрос.',
+        references: [],
+      });
     }
-    const trace = lawCacheByServer[server]?.trace || [];
-    const docs = lawCacheByServer[server]?.docs || [];
-    const answer = buildConsultantAnswer(question, server, docs);
+
+    const answer = buildConsultantAnswer(question, server, cached.docs);
     return res.json({
       ok: true,
       server,
-      mode: 'live',
-      cacheUpdatedAt: lawCacheByServer[server].updatedAt,
-      trace,
+      mode: 'cache',
+      cacheUpdatedAt: cached.updatedAt,
+      trace: cached.trace || [],
       answer: answer.text,
       references: answer.references,
     });
