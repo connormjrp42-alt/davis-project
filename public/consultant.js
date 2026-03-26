@@ -201,11 +201,12 @@
     sourcesEl.innerHTML = '';
 
     try {
+      const forumCookieHeader = String(forumCookieEl?.value || '').trim();
       const { response, data } = await fetchJsonSafe('/api/consultant/ask', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server, question }),
+        body: JSON.stringify({ server, question, forumCookieHeader }),
       });
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Ошибка обработки запроса');

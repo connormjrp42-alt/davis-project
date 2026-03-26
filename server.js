@@ -6401,6 +6401,7 @@ app.delete('/api/consultant/forum-session', (req, res) => {
 app.post('/api/consultant/ask', async (req, res) => {
   const server = sanitizeText(req.body?.server, 60);
   const question = sanitizeText(req.body?.question, 1200);
+  const transientForumCookie = normalizeForumCookieHeader(req.body?.forumCookieHeader);
 
   if (!server || !question) {
     return res.status(400).json({ error: 'invalid_payload' });
@@ -6411,14 +6412,22 @@ app.post('/api/consultant/ask', async (req, res) => {
 
   try {
     const forumAuth = getConsultantForumAuth(req);
+    const effectiveForumCookie = forumAuth?.cookieHeader || transientForumCookie;
     const cached = lawCacheByServer[server];
-    if (forumAuth?.cookieHeader) {
+    if (effectiveForumCookie) {
       try {
         const live = await withTimeout(
-          crawlLawBase(server, { forumCookieHeader: forumAuth.cookieHeader }),
+          crawlLawBase(server, { forumCookieHeader: effectiveForumCookie }),
           10_000,
           'forum_timeout'
         );
+        if (req.session?.user?.id && transientForumCookie && !forumAuth?.cookieHeader) {
+          req.session.consultantForumAuth = {
+            cookieHeader: transientForumCookie,
+            updatedAt: new Date().toISOString(),
+            ownerUserId: sanitizeText(req.session.user.id, 80),
+          };
+        }
         const answer = buildConsultantAnswer(question, server, live.docs || []);
         return res.json({
           ok: true,
