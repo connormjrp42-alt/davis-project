@@ -3978,6 +3978,20 @@ function parseIsoDate(value) {
   return Number.isFinite(time) ? time : 0;
 }
 
+async function withTimeout(promise, timeoutMs, timeoutMessage = 'timeout') {
+  let timer = null;
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(timeoutMessage));
+      }, Math.max(500, Number(timeoutMs) || 5000));
+    });
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 function buildPageTemplate({ title, body }) {
   const safeTitle = String(title || 'Новая страница').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const safeBody = String(body || '')
@@ -6397,21 +6411,52 @@ app.post('/api/consultant/ask', async (req, res) => {
 
   try {
     const forumAuth = getConsultantForumAuth(req);
+    const cached = lawCacheByServer[server];
     if (forumAuth?.cookieHeader) {
-      const live = await crawlLawBase(server, { forumCookieHeader: forumAuth.cookieHeader });
-      const answer = buildConsultantAnswer(question, server, live.docs || []);
-      return res.json({
-        ok: true,
-        server,
-        mode: 'user-session',
-        cacheUpdatedAt: null,
-        trace: live.trace || [],
-        answer: answer.text,
-        references: answer.references,
-      });
+      try {
+        const live = await withTimeout(
+          crawlLawBase(server, { forumCookieHeader: forumAuth.cookieHeader }),
+          10_000,
+          'forum_timeout'
+        );
+        const answer = buildConsultantAnswer(question, server, live.docs || []);
+        return res.json({
+          ok: true,
+          server,
+          mode: 'user-session',
+          cacheUpdatedAt: null,
+          trace: live.trace || [],
+          answer: answer.text,
+          references: answer.references,
+        });
+      } catch (liveError) {
+        if (cached && Array.isArray(cached.docs) && cached.docs.length) {
+          const answer = buildConsultantAnswer(question, server, cached.docs);
+          return res.json({
+            ok: true,
+            server,
+            mode: 'cache',
+            cacheUpdatedAt: cached.updatedAt,
+            trace: cached.trace || [],
+            answer: answer.text,
+            references: answer.references,
+            warning:
+              'Живой запрос через пользовательскую сессию форума не успел выполниться. Показан ответ из локального кэша.',
+          });
+        }
+        return res.json({
+          ok: true,
+          server,
+          mode: 'no-cache',
+          cacheUpdatedAt: null,
+          trace: [],
+          answer:
+            'Форум временно не отвечает или запрос обрабатывается слишком долго. Попробуйте снова позже или задайте более короткий вопрос.',
+          references: [],
+        });
+      }
     }
 
-    const cached = lawCacheByServer[server];
     if (!cached || !Array.isArray(cached.docs) || !cached.docs.length) {
       return res.json({
         ok: true,
