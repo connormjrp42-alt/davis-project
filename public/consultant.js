@@ -161,7 +161,6 @@
         throw new Error(data.message || data.error || 'session_connect_failed');
       }
       setSessionStatus('Сессия форума подключена успешно.', false);
-      forumCookieEl.value = '';
       await loadSyncStatus();
     } catch (error) {
       setSessionStatus(`Ошибка подключения сессии: ${error.message}`, true);
@@ -189,10 +188,35 @@
     event.preventDefault();
     const server = serverSelect.value.trim();
     const question = questionInput.value.trim();
+    const forumCookieHeader = String(forumCookieEl?.value || '').trim();
 
     if (!server || !question) {
       setStatus('Заполни сервер и вопрос.', true);
       return;
+    }
+
+    if (!forumCookieHeader) {
+      try {
+        const { response, data } = await fetchJsonSafe('/api/consultant/forum-session', {
+          credentials: 'same-origin',
+        });
+        if (!response.ok) {
+          throw new Error(data.message || data.error || 'session_status_failed');
+        }
+        if (!data.connected) {
+          setStatus(
+            'Для этого сервера нет локальной базы. Вставь Cookie форума в поле выше или нажми "Подключить сессию".',
+            true
+          );
+          return;
+        }
+      } catch {
+        setStatus(
+          'Не удалось проверить подключение сессии форума. Вставь Cookie форума в поле и повтори.',
+          true
+        );
+        return;
+      }
     }
 
     setStatus('Изучаю форум и законодательную базу сервера, подожди...', false);
@@ -201,7 +225,6 @@
     sourcesEl.innerHTML = '';
 
     try {
-      const forumCookieHeader = String(forumCookieEl?.value || '').trim();
       const { response, data } = await fetchJsonSafe('/api/consultant/ask', {
         method: 'POST',
         credentials: 'same-origin',
