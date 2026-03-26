@@ -7563,8 +7563,25 @@ app.get('/auth/logout', (req, res) => {
   });
 });
 
-startConsultantBackgroundSync();
-startBotGatewaySyncLoop();
+try {
+  startConsultantBackgroundSync();
+} catch (error) {
+  console.error('[startup] consultant sync init failed:', error);
+}
+
+try {
+  startBotGatewaySyncLoop();
+} catch (error) {
+  console.error('[startup] bot gateway sync init failed:', error);
+}
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[process] unhandledRejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[process] uncaughtException:', error);
+});
 
 app.listen(port, () => {
   console.log(`Davis Project server started on http://localhost:${port}`);
