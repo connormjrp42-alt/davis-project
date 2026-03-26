@@ -47,11 +47,24 @@
     syncMetaEl.style.color = isError ? '#ffb1d1' : '#a898c6';
   }
 
+  async function fetchJsonSafe(url, options = {}) {
+    const response = await fetch(url, options);
+    const raw = await response.text();
+    let data = {};
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch {
+      data = { message: raw || `HTTP ${response.status}` };
+    }
+    return { response, data };
+  }
+
   async function loadForumSessionStatus() {
     if (!sessionStatusEl) return;
     try {
-      const response = await fetch('/api/consultant/forum-session', { credentials: 'same-origin' });
-      const data = await response.json();
+      const { response, data } = await fetchJsonSafe('/api/consultant/forum-session', {
+        credentials: 'same-origin',
+      });
       if (!response.ok) throw new Error(data.message || data.error || 'session_status_failed');
 
       if (data.requiresDiscordAuth) {
@@ -71,8 +84,9 @@
 
   async function loadSyncStatus() {
     try {
-      const response = await fetch('/api/consultant/status', { credentials: 'same-origin' });
-      const data = await response.json();
+      const { response, data } = await fetchJsonSafe('/api/consultant/status', {
+        credentials: 'same-origin',
+      });
       if (!response.ok) throw new Error(data.error || 'status_failed');
 
       const sync = data.sync || {};
@@ -105,8 +119,8 @@
   async function loadServers() {
     serverSelect.innerHTML = '';
     try {
-      const response = await fetch('/api/consultant/servers');
-      const data = await response.json();
+      const { response, data } = await fetchJsonSafe('/api/consultant/servers');
+      if (!response.ok) throw new Error(data.message || data.error || 'servers_failed');
       const servers = Array.isArray(data.servers) ? data.servers : [];
       servers.forEach((name) => {
         const option = document.createElement('option');
@@ -137,13 +151,12 @@
 
     setSessionStatus('Проверяю и подключаю сессию форума...', false);
     try {
-      const response = await fetch('/api/consultant/forum-session', {
+      const { response, data } = await fetchJsonSafe('/api/consultant/forum-session', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cookieHeader }),
       });
-      const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || data.error || 'session_connect_failed');
       }
@@ -158,11 +171,10 @@
   disconnectSessionBtn?.addEventListener('click', async () => {
     setSessionStatus('Отключаю сессию форума...', false);
     try {
-      const response = await fetch('/api/consultant/forum-session', {
+      const { response, data } = await fetchJsonSafe('/api/consultant/forum-session', {
         method: 'DELETE',
         credentials: 'same-origin',
       });
-      const data = await response.json();
       if (!response.ok || !data.ok) {
         throw new Error(data.message || data.error || 'session_disconnect_failed');
       }
@@ -189,13 +201,12 @@
     sourcesEl.innerHTML = '';
 
     try {
-      const response = await fetch('/api/consultant/ask', {
+      const { response, data } = await fetchJsonSafe('/api/consultant/ask', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ server, question }),
       });
-      const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || data.error || 'Ошибка обработки запроса');
       }
