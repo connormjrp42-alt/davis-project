@@ -41,6 +41,28 @@
           Выберите сервер, опишите вопрос или ситуацию, и система попробует изучить законодательную базу сервера на форуме Majestic RP.
         </p>
 
+        <section class="consultant-session card">
+          <h2>Подключение сессии форума</h2>
+          <p class="consultant-session-text">
+            Войдите на форум Majestic RP в браузере, скопируйте заголовок Cookie и вставьте ниже.
+            Консультант будет запрашивать данные от имени вашей сессии.
+          </p>
+          <label>
+            Cookie форума
+            <textarea
+              id="consultantForumCookie"
+              rows="3"
+              maxlength="5000"
+              placeholder="Например: xf_user=...; xf_session=...; ..."
+            ></textarea>
+          </label>
+          <div class="consultant-session-actions">
+            <button id="consultantConnectSessionBtn" type="button" class="cta cta-primary">Подключить сессию</button>
+            <button id="consultantDisconnectSessionBtn" type="button" class="cta cta-ghost">Отключить</button>
+          </div>
+          <p id="consultantSessionStatus" class="consultant-session-status"></p>
+        </section>
+
         <form id="consultantForm" class="consultant-form">
           <label>
             Сервер Majestic

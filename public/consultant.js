@@ -1,4 +1,4 @@
-﻿(function initConsultant() {
+(function initConsultant() {
   const form = document.getElementById('consultantForm');
   const serverSelect = document.getElementById('consultantServer');
   const questionInput = document.getElementById('consultantQuestion');
@@ -7,12 +7,22 @@
   const resultEl = document.getElementById('consultantResult');
   const answerEl = document.getElementById('consultantAnswer');
   const sourcesEl = document.getElementById('consultantSources');
+  const forumCookieEl = document.getElementById('consultantForumCookie');
+  const sessionStatusEl = document.getElementById('consultantSessionStatus');
+  const connectSessionBtn = document.getElementById('consultantConnectSessionBtn');
+  const disconnectSessionBtn = document.getElementById('consultantDisconnectSessionBtn');
 
   if (!form || !serverSelect || !questionInput || !statusEl || !resultEl || !answerEl || !sourcesEl) return;
 
   function setStatus(text, isError) {
     statusEl.textContent = text || '';
     statusEl.style.color = isError ? '#ff9cc7' : '#d8c2ff';
+  }
+
+  function setSessionStatus(text, isError) {
+    if (!sessionStatusEl) return;
+    sessionStatusEl.textContent = text || '';
+    sessionStatusEl.style.color = isError ? '#ff9cc7' : '#d8c2ff';
   }
 
   function renderSources(sources) {
@@ -37,9 +47,31 @@
     syncMetaEl.style.color = isError ? '#ffb1d1' : '#a898c6';
   }
 
+  async function loadForumSessionStatus() {
+    if (!sessionStatusEl) return;
+    try {
+      const response = await fetch('/api/consultant/forum-session', { credentials: 'same-origin' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || data.error || 'session_status_failed');
+
+      if (data.requiresDiscordAuth) {
+        setSessionStatus('Для подключения сессии форума сначала войдите через Discord на сайте.', true);
+        return;
+      }
+      if (data.connected) {
+        const updated = data.updatedAt ? new Date(data.updatedAt).toLocaleString('ru-RU') : 'неизвестно';
+        setSessionStatus(`Сессия форума подключена. Обновлено: ${updated}.`, false);
+      } else {
+        setSessionStatus('Сессия форума не подключена. Работает только общий кэш.', false);
+      }
+    } catch {
+      setSessionStatus('Статус сессии форума временно недоступен.', true);
+    }
+  }
+
   async function loadSyncStatus() {
     try {
-      const response = await fetch('/api/consultant/status');
+      const response = await fetch('/api/consultant/status', { credentials: 'same-origin' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'status_failed');
 
@@ -96,6 +128,51 @@
     }
   }
 
+  connectSessionBtn?.addEventListener('click', async () => {
+    const cookieHeader = String(forumCookieEl?.value || '').trim();
+    if (!cookieHeader) {
+      setSessionStatus('Вставьте Cookie заголовок форума.', true);
+      return;
+    }
+
+    setSessionStatus('Проверяю и подключаю сессию форума...', false);
+    try {
+      const response = await fetch('/api/consultant/forum-session', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cookieHeader }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'session_connect_failed');
+      }
+      setSessionStatus('Сессия форума подключена успешно.', false);
+      forumCookieEl.value = '';
+      await loadSyncStatus();
+    } catch (error) {
+      setSessionStatus(`Ошибка подключения сессии: ${error.message}`, true);
+    }
+  });
+
+  disconnectSessionBtn?.addEventListener('click', async () => {
+    setSessionStatus('Отключаю сессию форума...', false);
+    try {
+      const response = await fetch('/api/consultant/forum-session', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || data.error || 'session_disconnect_failed');
+      }
+      setSessionStatus('Сессия форума отключена.', false);
+      await loadSyncStatus();
+    } catch (error) {
+      setSessionStatus(`Ошибка отключения: ${error.message}`, true);
+    }
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const server = serverSelect.value.trim();
@@ -114,6 +191,7 @@
     try {
       const response = await fetch('/api/consultant/ask', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ server, question }),
       });
@@ -129,6 +207,8 @@
       if (data.mode === 'cache') {
         const cacheTime = data.cacheUpdatedAt ? new Date(data.cacheUpdatedAt).toLocaleString('ru-RU') : 'неизвестно';
         setStatus(`Ответ сформирован из локальной базы (кэш от ${cacheTime}).`, false);
+      } else if (data.mode === 'user-session') {
+        setStatus('Готово. Ответ собран через подключенную сессию пользователя на форуме.', false);
       } else {
         setStatus('Готово. Ответ сформирован по актуальным данным форума.', false);
       }
@@ -138,6 +218,7 @@
   });
 
   loadServers();
+  loadForumSessionStatus();
   loadSyncStatus();
   setInterval(loadSyncStatus, 60 * 1000);
 })();

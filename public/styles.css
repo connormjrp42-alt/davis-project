@@ -1567,6 +1567,46 @@ h1 span {
   gap: 12px;
 }
 
+.consultant-session {
+  margin-top: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.consultant-session h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.consultant-session-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.consultant-session textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.consultant-session-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.consultant-session-status {
+  margin: 0;
+  min-height: 1.2em;
+  color: #d8c2ff;
+}
+
 .consultant-form label {
   display: grid;
   gap: 6px;

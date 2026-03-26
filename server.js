@@ -3723,16 +3723,47 @@ function slugFromName(name) {
     .replace(/^-+|-+$/g, '');
 }
 
-async function fetchHtml(url) {
+function normalizeForumCookieHeader(value) {
+  const raw = sanitizeText(value, 5000);
+  if (!raw) return '';
+  const withoutPrefix = raw.replace(/^cookie\s*:\s*/i, '').trim();
+  if (!withoutPrefix) return '';
+  if (!withoutPrefix.includes('=')) return '';
+  return withoutPrefix
+    .replace(/[\r\n]+/g, '; ')
+    .split(';')
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .join('; ');
+}
+
+function getConsultantForumAuth(req) {
+  const row = req?.session?.consultantForumAuth;
+  if (!row || typeof row !== 'object') return null;
+  const cookieHeader = normalizeForumCookieHeader(row.cookieHeader);
+  if (!cookieHeader) return null;
+  return {
+    cookieHeader,
+    updatedAt: sanitizeText(row.updatedAt, 80),
+  };
+}
+
+async function fetchHtml(url, options = {}) {
+  const forumCookieHeader = normalizeForumCookieHeader(options.forumCookieHeader);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
+    const headers = {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari',
+      Accept: 'text/html,application/xhtml+xml',
+    };
+    if (forumCookieHeader) {
+      headers.Cookie = forumCookieHeader;
+    }
+
     const response = await fetch(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari',
-        Accept: 'text/html,application/xhtml+xml',
-      },
+      headers,
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -3791,7 +3822,7 @@ function pickBestLink(links, keywords) {
   return best;
 }
 
-async function findServerStart(serverName, rootHtml) {
+async function findServerStart(serverName, rootHtml, options = {}) {
   const rootLinks = extractLinks(rootHtml, MAJESTIC_FORUM_ROOT);
   const comparableServer = normalizeComparable(serverName);
   const serverSlug = slugFromName(serverName);
@@ -3803,7 +3834,7 @@ async function findServerStart(serverName, rootHtml) {
   if (direct) return direct;
 
   const queryUrl = `${MAJESTIC_FORUM_ROOT}search/?q=${encodeURIComponent(serverName)}`;
-  const searchHtml = await fetchHtml(queryUrl);
+  const searchHtml = await fetchHtml(queryUrl, options);
   const searchLinks = extractLinks(searchHtml, queryUrl).filter((row) => row.href.startsWith(MAJESTIC_FORUM_ROOT));
   const found = searchLinks.find((row) => {
     const t = normalizeComparable(row.text);
@@ -3814,7 +3845,7 @@ async function findServerStart(serverName, rootHtml) {
   throw new Error(`Не удалось найти раздел сервера ${serverName}`);
 }
 
-async function pickStageWithFallback(baseUrl, html, stageKeywords) {
+async function pickStageWithFallback(baseUrl, html, stageKeywords, options = {}) {
   const baseLinks = extractLinks(html, baseUrl);
   const direct = pickBestLink(baseLinks, stageKeywords);
   if (direct) return direct;
@@ -3824,7 +3855,7 @@ async function pickStageWithFallback(baseUrl, html, stageKeywords) {
   let bestScore = 0;
   for (const child of forumChildren) {
     try {
-      const childHtml = await fetchHtml(child.href);
+      const childHtml = await fetchHtml(child.href, options);
       const childLinks = extractLinks(childHtml, child.href);
       const candidate = pickBestLink(childLinks, stageKeywords);
       if (!candidate) continue;
@@ -3855,14 +3886,17 @@ function extractTopicBody(html) {
   return merged.slice(0, 2600);
 }
 
-async function crawlLawBase(serverName) {
+async function crawlLawBase(serverName, options = {}) {
+  const requestOptions = {
+    forumCookieHeader: normalizeForumCookieHeader(options.forumCookieHeader),
+  };
   const trace = [];
-  const rootHtml = await fetchHtml(MAJESTIC_FORUM_ROOT);
-  const serverStart = await findServerStart(serverName, rootHtml);
+  const rootHtml = await fetchHtml(MAJESTIC_FORUM_ROOT, requestOptions);
+  const serverStart = await findServerStart(serverName, rootHtml, requestOptions);
   trace.push({ step: 'server', title: serverStart.text, url: serverStart.href });
 
   let currentUrl = serverStart.href;
-  let currentHtml = await fetchHtml(currentUrl);
+  let currentHtml = await fetchHtml(currentUrl, requestOptions);
 
   const stages = [
     { step: 'organizations', keys: ['организац', 'organizations'] },
@@ -3871,17 +3905,17 @@ async function crawlLawBase(serverName) {
   ];
 
   for (const stage of stages) {
-    const picked = await pickStageWithFallback(currentUrl, currentHtml, stage.keys);
+    const picked = await pickStageWithFallback(currentUrl, currentHtml, stage.keys, requestOptions);
     if (!picked) continue;
     trace.push({ step: stage.step, title: picked.text, url: picked.href });
     currentUrl = picked.href;
-    currentHtml = await fetchHtml(currentUrl);
+    currentHtml = await fetchHtml(currentUrl, requestOptions);
   }
 
   let topicLinks = extractLinks(currentHtml, currentUrl).filter((row) => /\/threads\//i.test(row.href));
   if (!topicLinks.length) {
     const fallbackSearch = `${MAJESTIC_FORUM_ROOT}search/?q=${encodeURIComponent(`${serverName} законодательная база`)}`;
-    const searchHtml = await fetchHtml(fallbackSearch);
+    const searchHtml = await fetchHtml(fallbackSearch, requestOptions);
     topicLinks = extractLinks(searchHtml, fallbackSearch).filter((row) => /\/threads\//i.test(row.href));
   }
   topicLinks = topicLinks.slice(0, 12);
@@ -3889,7 +3923,7 @@ async function crawlLawBase(serverName) {
   const docs = [];
   for (const link of topicLinks) {
     try {
-      const pageHtml = await fetchHtml(link.href);
+      const pageHtml = await fetchHtml(link.href, requestOptions);
       const plain = extractTopicBody(pageHtml);
       if (!plain) continue;
       docs.push({
@@ -4163,9 +4197,9 @@ function upsertParticipant(user) {
   writeJSON(USERS_FILE, participants);
 }
 
-async function refreshServerLawCache(serverName, reason = 'background') {
+async function refreshServerLawCache(serverName, reason = 'background', options = {}) {
   try {
-    const { trace, docs } = await crawlLawBase(serverName);
+    const { trace, docs } = await crawlLawBase(serverName, options);
     const nowIso = new Date().toISOString();
     lawCacheByServer[serverName] = {
       updatedAt: nowIso,
@@ -6285,10 +6319,69 @@ app.get('/api/consultant/status', (req, res) => {
     };
   });
 
+  const forumAuth = getConsultantForumAuth(req);
   return res.json({
     sync: consultantSyncState,
     servers,
+    forumSession: {
+      connected: Boolean(forumAuth?.cookieHeader),
+      updatedAt: forumAuth?.updatedAt || null,
+    },
   });
+});
+
+app.get('/api/consultant/forum-session', (req, res) => {
+  const forumAuth = getConsultantForumAuth(req);
+  return res.json({
+    connected: Boolean(forumAuth?.cookieHeader),
+    updatedAt: forumAuth?.updatedAt || null,
+    requiresDiscordAuth: !req.session.user,
+  });
+});
+
+app.post('/api/consultant/forum-session', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      error: 'auth_required',
+      message: 'Сначала войдите через Discord на сайте.',
+    });
+  }
+
+  const cookieHeader = normalizeForumCookieHeader(req.body?.cookieHeader);
+  if (!cookieHeader) {
+    return res.status(400).json({
+      error: 'invalid_payload',
+      message: 'Укажите Cookie заголовок авторизованной сессии форума.',
+    });
+  }
+
+  try {
+    await fetchHtml(MAJESTIC_FORUM_ROOT, { forumCookieHeader: cookieHeader });
+  } catch (error) {
+    return res.status(400).json({
+      error: 'forum_cookie_invalid',
+      message: `Сессия форума не прошла проверку: ${String(error.message || error)}`,
+    });
+  }
+
+  req.session.consultantForumAuth = {
+    cookieHeader,
+    updatedAt: new Date().toISOString(),
+    ownerUserId: sanitizeText(req.session.user.id, 80),
+  };
+
+  return res.json({
+    ok: true,
+    connected: true,
+    updatedAt: req.session.consultantForumAuth.updatedAt,
+  });
+});
+
+app.delete('/api/consultant/forum-session', (req, res) => {
+  if (req.session && req.session.consultantForumAuth) {
+    delete req.session.consultantForumAuth;
+  }
+  return res.json({ ok: true, connected: false });
 });
 
 app.post('/api/consultant/ask', async (req, res) => {
@@ -6303,6 +6396,21 @@ app.post('/api/consultant/ask', async (req, res) => {
   }
 
   try {
+    const forumAuth = getConsultantForumAuth(req);
+    if (forumAuth?.cookieHeader) {
+      const live = await crawlLawBase(server, { forumCookieHeader: forumAuth.cookieHeader });
+      const answer = buildConsultantAnswer(question, server, live.docs || []);
+      return res.json({
+        ok: true,
+        server,
+        mode: 'user-session',
+        cacheUpdatedAt: null,
+        trace: live.trace || [],
+        answer: answer.text,
+        references: answer.references,
+      });
+    }
+
     const syncResult = await refreshServerLawCache(server, 'manual-question');
     if (!syncResult.ok) {
       throw new Error(syncResult.error || 'sync_failed');
